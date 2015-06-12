@@ -1,0 +1,622 @@
+Dim canarr() As Variant
+Dim splarr() As Variant
+Dim destarr() As Variant
+Dim typearr() As Variant
+Dim ExcelRow As Integer
+Dim ExcelStartRow As Integer
+Dim host As Variant
+Dim retval As Variant
+Private Declare Function MessageBox _
+Lib "User32" Alias "MessageBoxA" _
+(ByVal hWnd As Long, _
+ByVal lpText As String, _
+ByVal lpCaption As String, _
+ByVal wType As Long) _
+As Long
+
+Option Compare Text
+
+Sub setupArrays()
+
+Dim cannums As New Collection
+Dim cansplits As New Collection
+Dim candests As New Collection
+Dim cantypes As New Collection
+
+row = 3
+Do While Sheet4.Cells(row, 1) <> ""
+   cannums.Add Sheet4.Cells(row, 1) '  dynamically add value to the end
+   cansplits.Add Sheet4.Cells(row, 2)
+   candests.Add Sheet4.Cells(row, 3)
+   cantypes.Add Sheet4.Cells(row, 4)
+   row = row + 1
+Loop
+
+canarr = toArray(cannums) 'convert collection to an array
+splarr = toArray(cansplits)
+destarr = toArray(candests)
+typearr = toArray(cantypes)
+
+
+End Sub
+
+Function toArray(col As Collection)
+  Dim arr() As Variant
+  ReDim arr(1 To col.Count) As Variant
+  For i = 1 To col.Count
+      arr(i) = col(i)
+  Next
+  toArray = arr
+
+End Function
+
+
+Sub bzConnect()
+
+ChDir "C:\"
+Set host = CreateObject("BZwhll.whllobj")
+retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+host.WaitCursor 1, 9, 1, 1
+retval = host.Connect("K")
+Set Wnd = host.Window()
+Wnd.Visible = True
+
+Wnd.Caption = "BDG v4.0 is Searching"
+If (retval) Then
+    host.MsgBox "Error connecting to Session K!", 48
+End If
+Call Module1.DEL
+ErrorChecker
+host.readscreen misc, 25, 8, 25
+host.readscreen misctwo, 42, 14, 15
+If Trim(misc) = "FEDERAL EXPRESS" Then
+    Call GhostAssign.Login
+ElseIf misctwo = "ENTER THE NUMBER OF THE DESIRED SYSTEM ===>" Then
+Else
+    Call GhostAssign.GrabUnassigned
+End If
+End Sub
+Sub Login()
+host.sendkey "IMS"
+host.sendkey "@E"
+host.waitready 1, 150
+host.readscreen setupData, 37, 1, 23
+
+If Trim(setupData) <> "F E D E R A L  E X P R E S S  I M S" Then
+    host.sendkey "@3"
+    Call GhostAssign.Login
+End If
+
+host.writescreen BORG.empnum, 7, 15
+host.writescreen BORG.PasswordBox, 7, 43
+host.sendkey "@E"
+host.waitready 1, 51
+
+host.sendkey "68"
+host.sendkey "@E"
+host.waitready 1, 51
+host.readscreen DGscreenInfo, 22, 1, 28
+If DGscreenInfo = "DANGEROUS GOODS SYSTEM" Then
+    host.writescreen BORG.Location.Text, 19, 44
+    If Trim(BORG.printerID.Text) <> "" Then host.writescreen BORG.printerID.Text, 21, 32
+    Call GhostAssign.GrabUnassigned(3)
+End If
+
+End Sub
+
+Sub GrabUnassigned(ERow As Integer)
+DGscreenChooser ("Assign")
+host.readscreen AssignViewType, 15, 3, 32
+If AssignViewType <> "UNASSIGNED VIEW" Then
+    host.sendkey "@2"
+End If
+
+ExcelRow = ERow
+ExcelStartRow = ExcelRow
+
+Call Module1.SETUP
+BORG.labelUpdater.Caption = "Doing work in the Assign Screen..."
+Dim SeqFinished As String
+
+Call TheGrab("A", ExcelRow, "unassigned")
+Call TheGrab("I", ExcelRow, "unassigned")
+
+'setup format and variables for VAWB section
+Sheet1.Columns("A:A").NumberFormat = "000000000000"
+Sheet1.Columns("C:C").NumberFormat = "0000"
+Sheet1.Columns("J:J").NumberFormat = "0.00000"
+ExcelRow = ExcelRow - 1
+Sheet3.Cells(3, 1).Value = ExcelRow
+Sheet3.Cells(2, 1).Value = ExcelRsow
+'finish setting stuff up for VAWB
+
+
+Call GhostVAWBrecipe
+End Sub
+Sub GrabAssigned(ERow As Integer, can As String)
+DGscreenChooser ("Assign")
+host.readscreen AssignViewType, 15, 3, 32
+If AssignViewType = "UNASSIGNED VIEW" Then
+    host.sendkey "@2"
+End If
+ExcelRow = ERow
+ExcelStartRow = ExcelRow
+
+Call Module1.SETUP
+BORG.labelUpdater.Caption = "Doing work in the Assign Screen..."
+Dim SeqFinished As String
+Dim E1 As Integer
+E1 = TheGrab("A", ExcelRow, can)
+E2 = TheGrab("I", E1, can)
+
+'setup format and variables for VAWB section
+Sheet1.Columns("A:A").NumberFormat = "000000000000"
+Sheet1.Columns("C:C").NumberFormat = "0000"
+Sheet1.Columns("J:J").NumberFormat = "0.00000"
+ExcelRow = ExcelRow - 1
+Sheet3.Cells(3, 1).Value = ExcelRow
+Sheet3.Cells(2, 1).Value = ExcelRsow
+'finish setting stuff up for VAWB
+
+
+Call GhostVAWBrecipe
+End Sub
+Function DGscreenChooser(menu As String)
+
+ChDir "C:\"
+Set host = CreateObject("BZwhll.whllobj")
+retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+host.WaitCursor 1, 9, 1, 1
+retval = host.Connect("K")
+Set Wnd = host.Window()
+
+host.readscreen DGscreenInfo, 22, 1, 28
+If DGscreenInfo = "DANGEROUS GOODS SYSTEM" Then
+    host.writescreen menu, 2, 17
+    host.sendkey "@E"
+    host.waitready 1, 51
+Else
+    host.sendkey "@C"                       'clears screen in IMS
+    host.sendkey "asap@e"                   'types ASAP and enters command
+    host.waitready 1, 51
+    host.readscreen miscData, 32, 1, 2
+    If miscData = "ASAP COMMAND IS UNKNOWN TO VTAM." Then
+        Call GhostAssign.Login
+    End If
+    host.sendkey "68@e"                     'enters 26 for dg training
+    host.waitready 1, 51
+    host.writescreen menu, 2, 17              'enters assign into first field to bring us to assign screen
+    host.writescreen BORG.Location.Text, 19, 44   'inputs the location ID in DGinput into station
+    If BORG.printerID <> "" Then host.writescreen BORG.printerID, 21, 32
+    host.sendkey "@e"                       'sends enter key to bring us finally to Assign Screen
+    host.waitready 1, 51
+End If
+host.readscreen retCode, 3, 24, 2
+If retCode = "136" Then
+    host.writescreen BORG.Location.Text, 19, 44
+End If
+
+ErrorChecker
+End Function
+Function ErrorChecker()
+
+terminal = ""
+host.readscreen terminal, 80, 1, 1
+If InStr(1, terminal, "APPLICATION NOT") > 1 Then
+    host.CloseSession 0, 11
+    Call GhostAssign.Login
+End If
+If InStr(1, terminal, "TERMINAL INACTIVE") > 1 Then
+    MsgBox ("Terminal Inactive Error" & vbNewLine & "Re-run BDG")
+    host.CloseSession 0, 11
+    GoTo RestartSession
+End If
+
+Exit Function
+
+RestartSession:
+    Call GhostAssign.bzConnect
+    
+End Function
+
+Function TheGrab(haztype As String, ERow As Integer, Optional cannum As String = "unassigned") As Integer
+
+row = 10
+
+host.writescreen haztype, 6, 45
+host.sendkey "@E"
+host.waitready 1, 51
+host.readscreen SeqFinished, 26, 24, 2
+Lcan = Len(cannum)
+Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
+    host.readscreen CanAssigned, Lcan, row, 19
+    If CanAssigned = cannum Or cannum = "unassigned" Then
+        host.readscreen awbfour, 4, row, 5
+        If awbfour = "    " Then Exit Do
+        Sheet1.Cells(ExcelRow, 3).Value = awbfour
+        host.writescreen "#", row, 2
+        host.sendkey "@E"
+        host.readscreen SeqFinished, 26, 24, 2
+        Sheet1.Cells(ExcelRow, 23).Value = haztype
+        CanAssign = "UnAssigned"
+        Sheet1.Cells(ExcelRow, 13).Value = CanAssign
+        BORG.labelUpdater.Caption = "Doing work in the Assign Screen..." & "Grabbing " & (ExcelRow - 2) & " Pieces"
+        host.readscreen UNnum, 6, row, 36
+        If UNnum = "******" Then UNnum = "Overpack"
+        Sheet1.Cells(ExcelRow, 4).Value = UNnum
+        host.readscreen PSN, 10, row, 43
+        Sheet1.Cells(ExcelRow, 5).Value = PSN
+        host.readscreen URSA, 8, row, 10
+        Sheet1.Cells(ExcelRow, 6).Value = Trim(URSA)
+        host.readscreen HazClass, 4, row, 54
+        If HazClass = "***" Then HazClass = "Ovrpk"
+        Sheet1.Cells(ExcelRow, 7).Value = HazClass
+        host.readscreen PackingGroup, 3, row, 59
+        If PackingGroup = "***" Then PackingGroup = "Ovrk"
+        Sheet1.Cells(ExcelRow, 8).Value = PackingGroup
+        host.readscreen pieces, 3, row, 64
+        Sheet1.Cells(ExcelRow, 9).Value = pieces
+        host.readscreen Weight, 10, row, 68
+        Sheet1.Cells(ExcelRow, 10).Value = Weight
+        host.readscreen UnitofMeasure, 2, row, 79
+        Sheet1.Cells(ExcelRow, 11).Value = UnitofMeasure
+        
+        host.readscreen FullAWB, 12, 24, 21
+        If oldawb = FullAWB Then
+            host.writescreen "#", row, 2
+            host.sendkey "@e"
+            host.waitready 1, 51
+            host.readscreen FullAWB, 12, 24, 21
+        End If
+        
+        oldawb = FullAWB
+        host.writescreen " ", row, 2
+        Sheet1.Cells(ExcelRow, 1).Value = FullAWB
+        host.readscreen APio, 6, row, 43
+        
+        If APio = "ALPKN1" Then
+            host.readscreen APnum, 3, row, 50
+            Sheet1.Cells(ExcelRow, 14).Value = APnum
+            host.readscreen APpcs, 3, row, 64
+            Sheet1.Cells(ExcelRow, 15).Value = APpcs
+        End If
+        
+        host.readscreen OPcheck, 6, row, 43
+        
+        If APio = "OVRPCK" Then
+            host.readscreen OPnum, 3, row, 50
+            Sheet1.Cells(ExcelRow, 16).Value = OPnum
+            host.readscreen OPpcs, 3, row, 64
+            Sheet1.Cells(ExcelRow, 17).Value = OPpcs
+        End If
+        
+        ExcelRow = ExcelRow + 1
+    End If
+    row = row + 1
+        If row >= 18 Then
+            host.sendkey "@8"
+            host.waitready 1, 51
+            row = 10
+            host.readscreen SeqFinished, 26, 24, 2
+        End If
+
+
+Loop 'do until grabbing stuff from assign screen END
+TheGrab = ExcelRow
+End Function
+
+Sub GhostVAWBrecipe()
+
+DGscreenChooser ("ViewAWB")
+
+BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..."
+
+ExcelRow = GetMaxRow - 1
+    Do Until ExcelRow = 2
+        If Trim(Sheet1.Cells(ExcelRow, 2)) = "" Then
+            If Sheet1.Cells(ExcelRow, 1) > 1 Then
+                BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..." & Maximum - (ExcelRow - 3) & " of " & Maximum
+                host.writescreen Sheet1.Cells(ExcelRow, 1).Text, 4, 6
+                host.sendkey "@e"
+                Sheet3.Cells(2, 1).Value = ExcelRow
+                Call ViewAWB.Directions(host)
+            End If
+        End If
+        ExcelRow = ExcelRow - 1
+    Loop
+
+BORG.labelUpdater.Caption = "Running Fixes"
+Call Module4.APOPfix
+
+End Sub
+
+Sub GhostSort()
+
+maxRow = GetMaxRow
+Call GhostAssign.setupArrays
+For i = 0 To (UBound(cannums, 1) - LBound(cannums, 1) + 1)
+    ERow = 5
+    Ecol = 3
+    Dim typeHaz As String
+    typeHaz = typearr(i)
+    setType = SetTypeFilter(typeHaz) 'convert skynet text to filterable text
+    
+    'set filter to include only pieces that match type of canType(i)
+    Sheet1.Range("$A$2:$X$2").AutoFilter Field:=23, Criteria1:=setType
+    
+    Do Until Sheet6.Cells(2, Ecol) = splarr(i)
+        Ecol = Ecol + 1
+    Loop
+    
+    typeHaz = splarr(i)
+    If typeHaz = "" Then GoTo nextIteration
+    Dim isLocal As Boolean
+    isLocal = isSplitLocal(typeHaz)
+    If isLocal = False Then
+        FilterOutLocal 'hides local stuff
+    Else 'shows local stuff
+        Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6
+    End If
+    
+    
+    Do Until Sheet6.Cells(ERow, Ecol) = ""
+        Dim tempSplit As String
+        tempSplit = Sheet6.Cells(ERow, Ecol).Text
+        Call setSplitFilter(tempSplit, isLocal)
+        
+        For row = 3 To maxRow - 1
+            'Use Hidden property to check if filtered or not
+            If Sheet1.Cells(row, 1).EntireRow.Hidden = False Then
+                Sheet1.Cells(row, 21).Value = canarr(i)
+                Sheet1.Cells(row, 22).Value = destarr(i)
+            End If
+        Next
+        ERow = ERow + 1
+    Loop
+nextIteration:
+assignedCansHidden = hideAssignedPcs()
+Next
+Call GhostAssign.filterClear
+End Sub
+
+
+Function GetMaxRow() As Integer
+    maxRow = 3
+    Do Until Sheet1.Cells(maxRow, 1).Value = ""
+        maxRow = maxRow + 1
+    Loop
+    GetMaxRow = maxRow
+End Function
+
+Function SetCanFilter(can As String) As Boolean
+On Error GoTo ErrOut:
+    Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:=can, Operator:=xlAnd
+    SetCanFilter = True
+    Exit Function
+    
+ErrOut:
+    SetCanFilter = False
+End Function
+
+Function hideAssignedPcs() As Boolean
+On Error GoTo ErrOut:
+    Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:="=", Operator:=xlAnd
+    hideAssignedPcs = True
+    Exit Function
+    
+ErrOut:
+    hideAssignedPcs = False
+End Function
+
+Function setSplitFilter(Split As String, isLocal As Boolean) As Boolean
+On Error GoTo ErrOut:
+    If isLocal = False Then
+        splitFilter = "=" + Split + "*"
+        'Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6, Criteria1:="=N*", Operator:=xlAnd
+        Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6, Criteria1:=splitFilter
+        setSplitFilter = True
+        Exit Function
+    Else 'we are doing a suffix split
+        splitFilter = "=*" + Split
+        Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6, Criteria1:=splitFilter
+        setSplitFilter = True
+        Exit Function
+    End If
+ErrOut:
+    setSplitFilter = False
+End Function
+
+Function SetTypeFilter(haztype As String)
+
+    Select Case haztype
+    Case "ADG"
+        ans = "A"
+    Case "IDG"
+        ans = "I"
+    Case "ALL"
+        ans = "=*"
+    End Select
+    
+    SetTypeFilter = ans
+    
+End Function
+
+
+Function FilterOutLocal()
+splshtRow = 5
+splitcol = 2
+
+shtOnerow = 3
+
+Do Until Sheet1.Cells(shtOnerow, 1) = ""
+    ursaCHK = Trim(Right(Sheet1.Cells(shtOnerow, 6), 5))
+    splshtRow = 5
+    Do Until Sheet6.Cells(splshtRow, 2) = ""
+        If Sheet6.Cells(splshtRow, 2) = ursaCHK Then
+            Sheet1.Cells(shtOnerow, 24) = "L"
+        End If
+    splshtRow = splshtRow + 1
+    Loop
+shtOnerow = shtOnerow + 1
+Loop
+
+Sheet1.Range("$A$2:$X$2").AutoFilter Field:=24, Criteria1:="<>L"
+End Function
+    'Sheet1.Range("$A$2:$X$2").AutoFilter
+    '"=*inwa"
+    'Sheet1.Range("$A$2:$X$2").AutoFilter Field:=14, Criteria1:="=N*"
+    'Sheet1.Range("$A$2:$X$2").AutoFilter Field:=23, Criteria1:="A"
+    'Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6, Operator:=xlAnd SortOn:=xlSortOnValues, Order:=xlAscending
+Sub filterClear()
+    Sheet1.Range("$A$2:$X$2").AutoFilter
+    Sheet1.Range("$A$2:$X$2").AutoFilter
+End Sub
+
+Function returnHost() As Variant
+
+If VarType(host) = vbEmpty Then
+    ChDir "C:\"
+    Set host = CreateObject("BZwhll.whllobj")
+    retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+    host.WaitCursor 1, 9, 1, 1
+    retval = host.Connect("K")
+    Set Wnd = host.Window()
+    Wnd.Caption = "BDG is Searching"
+    Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
+    If (retval) Then
+        host.MsgBox "Error connecting to Session K!", 48
+    End If
+  
+host.waitready 1, 51
+End If
+
+End Function
+
+Sub filterCanSort(cannum As String)
+Call GhostAssign.filterClear
+Call Module1.DELmanifestSheet
+
+myFilter = "=" + cannum
+Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:=myFilter
+ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range("C2:C999"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+    xlSortTextAsNumbers
+With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+    .Header = xlYes
+    .MatchCase = False
+    .Orientation = xlTopToBottom
+    .SortMethod = xlPinYin
+    .Apply
+End With
+
+If BORG.StationSort.Value = True Then
+        ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("B3:B999") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    Call Module4.HAZ_LIST_w_Station
+ElseIf BORG.Can_flight.Value = True Then
+ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("C2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("S2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    ActiveWindow.ScrollColumn = 2
+    ActiveWindow.ScrollColumn = 3
+    Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:=cannum
+    Call Module4.HAZ_LIST_w_flightInfo
+Else
+    Call Module4.HAZ_LIST
+End If
+
+Sheet2.Cells(2, 6) = UCase(cannum) + "  -  (Not Assigned)"
+Call Module4.QoL_stuff
+Call Module1.printFun
+
+End Sub
+
+Sub dupFind()
+
+Call GhostAssign.filterClear
+Call GhostAssign.sortingsub
+eRows = 3
+
+Do Until Sheet1.Cells(eRows, 1).Text = ""
+megastring = ""
+    For i = 1 To 22
+        megastring = megastring & Sheet1.Cells(eRows, i).Text
+    Next
+    If oldstring = megastring And Sheet1.Cells(eRows, 23) <> Sheet1.Cells(eRows - 1, 23) Then
+        'MsgBox ("we found a dupe!")
+        BORG.labelUpdater.Caption = "Removing Dupe!"
+        If Sheet1.Cells(eRows, 23).Text = "I" Then
+            'delete duplicate I row
+            Sheet1.Rows(eRows).Delete shift:=xlUp
+        ElseIf Sheet1.Cells(eRows - 1, 23).Text = "I" Then
+            'delete duplicate I row from previous megastring
+            Sheet1.Rows(eRows - 1).Delete shift:=xlUp
+        Else
+            'something is wrong
+            bla = MsgBox("dup find did not work!", vbCritical)
+            Exit Sub
+        End If
+        
+    End If
+    oldstring = megastring
+    eRows = eRows + 1
+Loop
+
+End Sub
+
+
+Sub sortingsub()
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("N2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("P2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("A2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortTextAsNumbers
+    With ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+End Sub
+
+

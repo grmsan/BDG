@@ -1,0 +1,643 @@
+Dim ExcelRow As Integer
+Dim host As Variant
+Dim retval As Variant
+Private Declare Function MessageBox _
+Lib "User32" Alias "MessageBoxA" _
+(ByVal hWnd As Long, _
+ByVal lpText As String, _
+ByVal lpCaption As String, _
+ByVal wType As Long) _
+As Long
+
+Option Compare Text
+
+Sub BZcloseSessions()
+
+Set BZ = CreateObject("BZWhll.WhllObj")
+
+With BZ
+    .waitready 1, 51
+    .CloseSession 0, 11
+    BORG.loginStatusOff.Visible = True
+BORG.labelUpdater.Caption = "Closing Previous Sesson..."
+Application.Wait Now + TimeValue("00:00:01")
+End With
+
+End Sub
+Sub BZOpenSession()
+ChDir "C:\"
+Set host = CreateObject("BZwhll.whllobj")
+
+retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+host.WaitCursor 1, 9, 1, 1
+retval = host.Connect("K")
+Set Wnd = host.Window() ' Makes the window invisible.....
+Wnd.Visible = True
+Wnd.Caption = "BDG is Searching"
+Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
+If (retval) Then
+    host.MsgBox "Error connecting to Session K!", 48
+    End If
+host.waitready 1, 51
+
+EmployeeNumber = BORG.empnum
+IMSPassword = BORG.PasswordBox
+    
+Terminal_check
+
+ResultCode = host.Connect("K")
+If (ResultCode = 0) Then
+    host.writescreen "ims", 9, 1
+    host.sendkey "@E"
+    host.waitready 1, 51
+    host.writescreen EmployeeNumber, 7, 15
+    host.writescreen IMSPassword, 7, 43
+    host.sendkey "@E"
+    host.waitready 1, 51
+Else
+    OpenBlueZone.BZcloseSessions
+    x = MsgBox("Error!" & vbNewLine & "Unable to connect to bluezone!" _
+        & vbNewLine & "Please try and log in again.", vbCritical, "Error!")
+    Exit Sub
+End If
+
+host.readscreen Enter, 5, 14, 15
+
+If Enter = "ENTER" Then
+    BORG.labelUpdater.Caption = "Going to AutoDG..."
+    'host.sendkey "26" 'DG training for testing comment this whole line before publishing
+    host.sendkey "68" 'Live AutoDG
+    host.sendkey "@E"
+    host.sendkey "assign"
+    host.writescreen BORG.Location.Text, 19, 44
+    If BORG.printerID <> "" Then host.writescreen BORG.printerID.Text, 21, 32
+    host.sendkey "@E"
+    host.waitready 1, 51
+Else
+   host.CloseSession 0, 11
+   MsgBox "Incorrect Login Credentials"
+   Exit Sub
+End If
+
+Call G2CloseScreen
+Call GrabCloseScreen
+BORG.labelUpdater.Caption = "BDG is now connected to Bluezone Session."
+BORG.tgl_btnLogin.Value = False
+BORG.loginStatusOff.Visible = False
+End Sub
+
+Sub AssignWork()
+Terminal_check
+host.writescreen "assign", 2, 17
+host.sendkey "@e"
+host.waitready 1, 51
+host.sendkey "@2"
+host.waitready 1, 51
+
+cannum = BORG.CanSelectGUI.Value
+
+
+Dim SeqFinished As String
+Dim row As Integer
+
+ExcelRow = 3
+row = 10
+
+Call Module1.SETUP
+
+Dim lResult As Long
+lResult = Len(cannum)
+
+'do until grabbing stuff from assign screen
+'START
+host.readscreen SeqFinished, 26, 24, 2
+BORG.labelUpdater.Caption = "Doing work in the Assign Screen..."
+Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
+'roadrunner
+    host.readscreen SeqFinished, 26, 24, 2
+    host.readscreen CanAssigned, lResult, row, 19
+        If CanAssigned = cannum Then
+            BORG.labelUpdater.Caption = "Doing work in the Assign Screen..." & "Grabbing " & (ExcelRow - 3) & " Pieces"
+            host.writescreen "#", row, 2
+            host.sendkey "@e"
+            host.waitready 1, 51
+            host.readscreen awbfour, 4, row, 5
+            If awbfour = "    " Then Exit Do
+            Sheet1.Cells(ExcelRow, 3).Value = awbfour
+            host.readscreen UNnum, 6, row, 36
+                If UNnum = "******" Then UNnum = "Overpack"
+            Sheet1.Cells(ExcelRow, 4).Value = UNnum
+            host.readscreen PSN, 10, row, 43
+            Sheet1.Cells(ExcelRow, 5).Value = PSN
+            host.readscreen URSA, 8, row, 10
+            Sheet1.Cells(ExcelRow, 6).Value = Trim(URSA)
+            host.readscreen HazClass, 4, row, 54
+                If HazClass = "***" Then HazClass = "Ovrpk"
+            Sheet1.Cells(ExcelRow, 7).Value = HazClass
+            host.readscreen PackingGroup, 3, row, 59
+                If PackingGroup = "***" Then PackingGroup = "Ovrk"
+            Sheet1.Cells(ExcelRow, 8).Value = PackingGroup
+            host.readscreen pieces, 3, row, 64
+            Sheet1.Cells(ExcelRow, 9).Value = pieces
+            host.readscreen Weight, 10, row, 68
+            Sheet1.Cells(ExcelRow, 10).Value = Weight
+            host.readscreen UnitofMeasure, 2, row, 79
+            Sheet1.Cells(ExcelRow, 11).Value = UnitofMeasure
+            host.readscreen FullAWB, 12, 24, 21
+'                If oldawb = FullAWB Then
+'                    host.waitready 1, 75
+'                    host.writescreen "#", row, 2
+'                    host.sendkey "@e"
+'                    'roadrunner
+'                    host.waitready 1, 75
+'                    host.readscreen FullAWB, 12, 24, 21
+'               End If
+            oldawb = FullAWB
+            Sheet1.Cells(ExcelRow, 1).Value = FullAWB
+            Sheet1.Cells(ExcelRow, 13).Value = cannum
+            host.readscreen APio, 6, row, 43
+                If APio = "ALPKN1" Then
+                    host.readscreen APnum, 3, row, 50
+                    Sheet1.Cells(ExcelRow, 14).Value = APnum
+                    host.readscreen APpcs, 3, row, 64
+                    Sheet1.Cells(ExcelRow, 15).Value = APpcs
+                End If
+            host.readscreen OPcheck, 6, row, 43
+                If APio = "OVRPCK" Then
+                    host.readscreen OPnum, 3, row, 50
+                    Sheet1.Cells(ExcelRow, 16).Value = OPnum
+                    host.readscreen OPpcs, 3, row, 64
+                    Sheet1.Cells(ExcelRow, 17).Value = OPpcs
+                End If
+            host.writescreen " ", row, 2
+'            host.sendkey "@e"
+'            host.waitready 1, 51
+            ExcelRow = ExcelRow + 1
+        End If
+If row >= 18 Then
+    host.sendkey "@8"
+    host.waitready 1, 51
+    row = 10
+    host.readscreen SeqFinished, 26, 24, 2
+End If
+    
+row = row + 1
+Loop 'do until grabbing stuff from assign screen'END
+Sheet1.Columns("A:A").NumberFormat = "000000000000"
+Sheet1.Columns("C:C").NumberFormat = "0000"
+Sheet1.Columns("J:J").NumberFormat = "0.00000"
+ExcelRow = ExcelRow - 1
+Sheet3.Cells(3, 1).Value = ExcelRow
+Sheet3.Cells(2, 1).Value = ExcelRow
+Call OpenBlueZone.GoViewAWB
+End Sub
+
+
+Sub GoViewAWB()
+'This section is for finding the origin of a package.
+'Also for filling out information regarding to All packed in One's and Overpack
+'check rq - check UN - check PSN - check class (Subclass)- check PG - check amount- check unit of measure - piece count
+     
+host.writescreen "viewawb", 2, 17 'gets us to the viewawb menu
+host.sendkey "@e"
+host.waitready 1, 51
+BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..."
+
+Maximum = ExcelRow - 2
+Call Module4.EQfix
+Do Until ExcelRow = 2
+    If Sheet1.Cells(ExcelRow, 1) > 1 Then
+        BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..." & Maximum - (ExcelRow - 3) & " of " & Maximum
+        host.writescreen Sheet1.Cells(ExcelRow, 1).Text, 4, 6
+        host.sendkey "@e"
+        Sheet3.Cells(2, 1).Value = ExcelRow
+        Call ViewAWB.Directions(host)
+    End If
+    ExcelRow = ExcelRow - 1
+Loop
+
+BORG.labelUpdater.Caption = "Running Fixes"
+Call Module4.APOPfix
+
+BORG.labelUpdater.Caption = "Sorting your data..."
+Call Module4.SORT_MACRO
+
+BORG.labelUpdater.Caption = "Counting Gas"
+Call Module4.gasCount
+
+BORG.labelUpdater.Caption = "Counting Pieces"
+Call Module4.pieceCount
+
+BORG.labelUpdater.Caption = "Printing your data..."
+If BORG.PrintQ = True Then Call Module1.printFun
+
+End Sub
+
+Sub CloseSession()
+
+BORG.labelUpdater.Caption = "Closing IMS..."
+host.CloseSession 0, 11
+Sheet3.Cells(2, 4).Value = Time()
+BORG.labelUpdater.Caption = "Done!"
+
+End Sub
+
+
+
+Function Terminal_check()
+terminal = ""
+host.readscreen terminal, 17, 1, 19
+
+If terminal = "TERMINAL INACTIVE" Then
+    MsgBox ("Terminal Inactive Error" & vbNewLine & "Re-run BDG")
+    host.CloseSession 0, 11
+    End
+End If
+
+End Function
+
+Function G2CloseScreen()
+
+host.readscreen DGcheck, 22, 1, 28
+If DGcheck = "DANGEROUS GOODS SYSTEM" Then
+    host.writescreen "Close", 2, 17
+    host.sendkey "@e"
+    host.waitready 1, 51
+    host.sendkey "@e"
+    host.waitready 1, 51
+Else
+    host.sendkey "@C"                       'clears screen in IMS
+    host.sendkey "asap@e"                   'types ASAP and enters command
+    host.waitready 1, 51
+    host.sendkey "68@e"                     'enters 68 to bring us to the main DG screen
+    host.waitready 1, 51
+    host.sendkey "assign@e"                 'enters assign into first field to bring us to assign screen
+    host.waitready 1, 51
+    host.sendkey BORG.Location.Text      'inputs the location ID in DGinput into station
+    host.sendkey "@e"                       'sends enter key to bring us finally to Assign Screen
+    host.waitready 1, 51
+End If
+
+End Function
+Function GrabCloseScreen()
+BORG.CanSelectGUI.Locked = True
+cannum = ""
+STA = ""
+Status = ""
+
+row = 8
+i = 0
+col = Array(6, 33, 60)
+x = 0
+With BORG.CanSelectGUI
+    .AddItem Trim(cannum)
+    .Column(1, x) = Trim(STA)
+    .Column(2, x) = Status
+End With
+
+x = x + 1
+host.readscreen inClose, 21, 2, 29
+If inClose = "CLOSE/REOPEN ULD/BULK" Then
+    Do Until cannum = "          "
+        host.readscreen cannum, 10, row, col(i)
+        host.readscreen STA, 5, row, col(i) + 11
+        host.readscreen Status, 1, row, col(i) + 18
+        If cannum = "          " Then
+            BORG.CanSelectGUI.Locked = False
+            Exit Do
+        End If
+        Sheet3.Cells(x + 3, 12).Value = cannum
+        Sheet3.Cells(x + 3, 13).Value = STA
+        Sheet3.Cells(x + 3, 14).Value = Status
+        With BORG.CanSelectGUI
+            .AddItem Trim(cannum)
+            .Column(1, x) = Trim(STA)
+            .Column(2, x) = Status
+        End With
+            If i = 2 Then
+                i = 0
+                row = row + 1
+            Else: i = i + 1
+            End If
+        x = x + 1
+    Loop
+End If
+BORG.CanSelectGUI.Locked = False
+End Function
+Function closedcancheck()
+col = Array(3, 30, 57)
+closerow = 8
+i = 0
+Do Until BORG.cannum.Value = Sheet3.Cells(x, 12).Value
+    x = x + 1
+Loop
+If Sheet3.Cells(x, 14).Value = "C" Then
+    host.readscreen can, 10, closerow, col(i)
+End If
+End Function
+
+Function openclosedcan(can As Variant)
+cannum = ""
+STA = ""
+Status = ""
+row = 8
+i = 0
+col = Array(6, 33, 60)
+x = 0
+host.readscreen inClose, 21, 2, 29
+If inClose = "CLOSE/REOPEN ULD/BULK" Then
+    Do Until cannum = "          "
+        host.readscreen cannum, 10, row, col(i)
+        host.readscreen STA, 5, row, col(i) + 11
+        host.readscreen Status, 1, row, col(i) + 18
+        If Trim(cannum) = can Then
+            If Status = "C" Then
+                host.writescreen "O", row, col(i) - 3
+                host.sendkey "@e"
+                host.waitready 1, 51
+                host.readscreen ErrorCode, 3, 24, 2
+                If ErrorCode = "469" Then
+                    host.readscreen ErrorCode, 25, 24, 20
+                    MsgBox (ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION")
+                    host.writescreen " ", row, col(i) - 3
+                End If
+                If ErrorCode = "057" Then
+                    MsgBox (cannum & " opened successfully")
+                End If
+            Else:
+                MsgBox (cannum & " is already open")
+            End If
+         End If
+            If i = 2 Then
+                i = 0
+                row = row + 1
+            Else: i = i + 1
+            End If
+        x = x + 1
+    Loop
+    
+End If
+End Function
+
+Function UnassignCan(can As Variant)
+
+cannum = ""
+STA = ""
+Status = ""
+row = 8
+i = 0
+col = Array(6, 33, 60)
+x = 0
+host.readscreen inClose, 21, 2, 29
+If inClose = "CLOSE/REOPEN ULD/BULK" Then
+    Do Until cannum = "          "
+        host.readscreen cannum, 10, row, col(i)
+        host.readscreen STA, 5, row, col(i) + 11
+        host.readscreen Status, 1, row, col(i) + 18
+        If Trim(cannum) = can Then
+            If Status = "O" Then
+                host.writescreen "U", row, col(i) - 3
+                host.sendkey "@e"
+                host.waitready 1, 51
+                host.readscreen ErrorCode, 3, 24, 2
+                If ErrorCode = "469" Then
+                    host.readscreen ErrorCode, 25, 24, 20
+                    MsgBox (ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION")
+                End If
+                Exit Function
+            Else
+                MsgBox (Trim(cannum) & " is not open." & vbNewLine & _
+                        "Please open " & Trim(cannum) & " and try again.")
+            End If
+        End If
+            If i = 2 Then
+                i = 0
+                row = row + 1
+            Else: i = i + 1
+            End If
+        x = x + 1
+    Loop
+End If
+
+End Function
+
+Function CloseCan(can As Variant)
+cannum = ""
+STA = ""
+Status = ""
+row = 8
+i = 0
+col = Array(6, 33, 60)
+x = 0
+
+host.readscreen inClose, 21, 2, 29
+If inClose = "CLOSE/REOPEN ULD/BULK" Then
+    Do Until cannum = "          "
+    host.readscreen cannum, 10, row, col(i)
+    host.readscreen STA, 5, row, col(i) + 11
+    host.readscreen Status, 1, row, col(i) + 18
+    If Trim(cannum) = can Then
+        If Status = "O" Then
+            host.writescreen "C", row, col(i) - 3
+            host.sendkey "@e"
+            host.waitready 1, 51
+            host.readscreen ErrorCode, 3, 24, 2
+            If ErrorCode = "279" Then
+                MsgBox ("Can is already Closed!")
+                host.writescreen " ", row, col(i) - 3
+            End If
+            If ErrorCode = "057" Then
+                MsgBox (cannum & " opened successfully")
+            End If
+            If ErrorCode = "470" Then
+                host.readscreen Error, 50, 24, 20
+                MsgBox (Error & vbNewLine & "Flight has not yet arrived in the system yet")
+            End If
+            If ErrorCode = "068" Then
+                host.sendkey "ym"
+                host.sendkey "@e"
+                host.waitready 1, 51
+                host.readscreen ErrorCode, 3, 24, 2
+            End If
+            If ErrorCode = "084" Then
+                printer = Application.InputBox("Enter the printer you wish to print the manifest from", "Printer Select", , , , , , 2)
+                host.sendkey printer
+                host.sendkey "@e"
+                host.waitready 1, 51
+            End If
+            host.readscreen ErrorCode, 3, 24, 2
+            If ErrorCode = "083" Then
+                MsgBox (can & " has been closed successfully and manifest has been sent to printer " & printer)
+            End If
+        Else:
+            MsgBox (cannum & " is already Closed")
+        End If
+     End If
+        If i = 2 Then
+            i = 0
+            row = row + 1
+        Else: i = i + 1
+        End If
+    x = x + 1
+    Loop
+End If
+host.sendkey "@3"
+End Function
+
+Function AddIce(can As Variant)
+cannum = ""
+STA = ""
+Status = ""
+row = 8
+i = 0
+col = Array(6, 33, 60)
+x = 0
+userinput = 0
+If can = "none" Then
+    can = Application.InputBox("Enter the can/bulk to enter your ice into", "Can entry", , , , , , 2)
+    STA = Application.InputBox("Where is " & can & " going?" & vbNewLine & _
+        "PHXR, MEMH, OAKH, etc etc", "Station Select", , , , , , 2)
+    userinput = 1
+    host.writescreen "ICE", 2, 17
+    host.sendkey "@e"
+    host.waitready 1, 51
+    host.writescreen can, 7, 24
+    host.writescreen STA, 7, 50
+    ice = Application.InputBox("How much ice is in " & can & " can?", "Ice Entry", , , , , , 1)
+    host.writescreen ice, 13, 24
+    host.sendkey "@6"
+    host.waitready 1, 51
+    host.readscreen Error, 3, 24, 2
+    If Error = "053" Then
+        MsgBox (ice & " ice has been assigned to " & cannum)
+        host.sendkey "@3"
+    End If
+    If Error = "028" Then
+        STA = Application.InputBox("Where is " & can & " going?" & vbNewLine & _
+        "PHXR, MEMH, OAKH, etc etc", "Station Select", , , , , , 2)
+        host.sendkey "@3"
+        Exit Function
+    End If
+End If
+'host.readscreen inClose, 32, 2, 25
+'If inClose = "CLOSEOUT ULD/BULK - CONFIRMATION" Then
+host.readscreen inClose, 21, 2, 29
+If inClose = "CLOSE/REOPEN ULD/BULK" And userinput = 0 Then
+    Do Until cannum = "          "
+    host.readscreen cannum, 10, row, col(i)
+    host.readscreen STA, 5, row, col(i) + 11
+    host.readscreen Status, 1, row, col(i) + 18
+    If Trim(cannum) = can Then
+        If Status = "O" Then
+            host.writescreen "ICE", 2, 17
+            host.sendkey "@e"
+            host.waitready 1, 51
+            host.writescreen cannum, 7, 24
+            host.writescreen STA, 7, 50
+            ice = Application.InputBox("How much ice is in this can?", "Ice Entry", , , , , , 1)
+            host.writescreen ice, 13, 24
+            host.sendkey "@6"
+            host.waitready 1, 51
+            host.readscreen Error, 3, 24, 2
+            If Error = "053" Then
+                MsgBox (ice & " ice has been assigned to " & cannum)
+                Exit Do
+            End If
+            
+        Else:
+            MsgBox (cannum & " is closed and needs to be open to assign ICE.")
+        End If
+     End If
+        If i = 2 Then
+            i = 0
+            row = row + 1
+        Else: i = i + 1
+        End If
+    x = x + 1
+    Loop
+End If
+host.sendkey "@3"
+End Function
+
+Function locCHK(host As Variant)
+mylocation = UCase(BORG.Location)
+r = 13
+C = 8
+host.readscreen org, Len(BORG.Location), 4, 24
+If org = BORG.Location Then
+    locCHK = True
+    Exit Function
+End If
+
+host.readscreen Location, 5, r, C
+Do Until r = 22
+host.readscreen Location, 5, r, C
+If Trim(Location) = mylocation Then
+    locCHK = True
+    Exit Function
+End If
+r = r + 1
+Loop
+End Function
+
+Sub generateLocalList(stationID As String)
+
+host.readscreen miscData, 30, 1, 25
+If InStr(1, miscData, "DANGEROUS GOODS SYSTEM") >= 1 Then
+    'only triggers if in the DG (68) system
+    host.writescreen "viewursa", 2, 17
+    host.sendkey "@e"
+Else 'take us to the DG system
+    host.sendkey "@C"                       'clears screen in IMS
+    host.sendkey "asap@e"                   'types ASAP and enters command
+    host.waitready 1, 51
+    host.sendkey "68@e"                     'enters 26 for dg training
+    host.waitready 1, 51
+    host.sendkey "viewursa"                 'enters assign into first field to bring us to assign screen
+    host.sendkey "@e"
+    host.waitready 1, 51
+    host.sendkey BORG.Location.Text      'inputs the location ID in DGinput into station
+    If BORG.printerID <> "" Then host.writescreen BORG.printerID, 21, 32
+    host.sendkey "@e"                       'sends enter key to bring us finally to Assign Screen
+    host.waitready 1, 51
+End If
+
+'if everthing looks good up to hear let's be sure to clear our last local list...
+Call SplitCentral.clearLocal
+
+enterStationID:
+stationID = Left(stationID, 3)
+host.writescreen stationID, 4, 11
+host.sendkey "@E"
+host.waitready 1, 51
+
+host.readscreen miscData, 3, 24, 2
+If miscData = "005" Then
+    stationID = InputBox("Error occured." & vbNewLine & "Please enter your 3 digit ramp ID", "Invalid Destination")
+    GoTo enterStationID
+End If
+miscData = "temp"
+Sheet6.Cells(4, 2).Value = stationID
+
+ERow = 5
+col = 2
+row = 8
+Do Until miscData = "   "
+    host.readscreen miscData, 3, row, col
+    If Trim(miscData) = "" Then Exit Do
+    miscData = miscData + "A"
+    Sheet6.Cells(ERow, 2).Value = miscData
+    ERow = ERow + 1
+    col = col + 6
+    If col > 75 Then
+        col = 2
+        row = row + 1
+    End If
+Loop
+
+MsgBox ("Your local sort list has been generated." & vbNewLine & _
+        "Please look over the list in the Sort Menu and confirm your splits." _
+        & vbNewLine & vbNewLine & _
+        "BDG generates the list form the ViewURSA screen in AutoDG. However the ViewURSA has some incorrect data and it's important to view the list yourself.")
+End Sub
+
