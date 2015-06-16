@@ -221,7 +221,7 @@ Loop
 Sheet1.Columns("A:A").NumberFormat = "000000000000"
 Sheet1.Columns("C:C").NumberFormat = "0000"
 Sheet1.Columns("J:J").NumberFormat = "0.00000"
-excelrow = excelrow - 1
+'excelrow = excelrow - 1
 Sheet3.Cells(3, 1).Value = excelrow
 Sheet3.Cells(2, 1).Value = excelrow
 
