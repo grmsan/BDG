@@ -1,4 +1,3 @@
-Attribute VB_Name = "FlexAssign"
 
 Dim host As Variant
 Dim cannum As Variant
