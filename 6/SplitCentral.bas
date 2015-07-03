@@ -1,4 +1,3 @@
-Attribute VB_Name = "SplitCentral"
 Dim excelcol As Integer
 Dim excelrow As Integer
 
