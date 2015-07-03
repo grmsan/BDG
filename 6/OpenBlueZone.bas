@@ -1,4 +1,3 @@
-Attribute VB_Name = "OpenBlueZone"
 Dim excelrow As Integer
 Dim host As Variant
 Dim retval As Variant
@@ -255,7 +254,7 @@ Do Until excelrow = 2
             MsgBox ("no data for " & Sheet1.Cells(excelrow, 1).Text & vbNewLine & _
                     "ExcelRow = " & excelrow)
         Else
-            Call ViewAWB.Directions(host)
+            Call VAWB.Directions(host, excelrow)
         End If
     End If
     excelrow = excelrow - 1
