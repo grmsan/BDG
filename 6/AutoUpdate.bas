@@ -1,6 +1,4 @@
-Attribute VB_Name = "AutoUpdate"
-Public Const strThisVer As String = "5.0"
-
+Public Const strThisVer As String = "6.00"
 
 Public Const strFileName As String = "BDG"
 
@@ -39,7 +37,7 @@ For Each Item In modulenames
 Next
     
     'now to update the version number within this module itself....
-    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/BDGversion")
+    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion")
     Dim VBProj As VBIDE.VBProject
     Dim VBComp As VBIDE.VBComponent
     Dim CodeMod As VBIDE.CodeModule
@@ -77,13 +75,14 @@ Sub remakeModule(myModule As String, BDGdata As Variant)
     Exit Sub
 createModule:
 AddModuleToProject (myModule)
-myCMD = InputBox("Adding module " & myModule & " to BDG." & vbNewLine & "If message keeps appearing type stop to stop BDG")
-If myCMD = "stop" Then Exit Sub
+'myCMD = InputBox("Adding module " & myModule & " to BDG." & vbNewLine & "If message keeps appearing type stop to stop BDG")
+'If myCMD = "stop" Then Exit Sub
 Call remakeModule(myModule, BDGdata)
 End Sub
 
 Function modAddress(myModule As String) As String
-    modAddress = "https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/" & myModule & ".bas"
+    'https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion
+    modAddress = "https://raw.githubusercontent.com/grmsan/BDG/master/6/" & myModule & ".bas"
 End Function
 
 
@@ -99,8 +98,8 @@ Function CreateModList()
         col.Add Item.Name
     Next
     
-    'myFile = Application.DefaultFilePath & "\Modules.txt"
-    myFile = "C:\Learning-Repo\BDG\Modules.txt"
+    myFile = Application.DefaultFilePath & "\Modules.txt"
+    'myFile = "C:\Learning-Repo\BDG\Modules.txt"
     Open myFile For Output As #1
     
     For Each Item In col
@@ -116,22 +115,22 @@ Function currentversion() As Boolean
     Dim nThisVer As Double
     Dim nCurVer As Double
     
-    On Error GoTo ErrOut
-    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/BDGversion")
+    On Error GoTo errout
+    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion")
     
     nCurVer = Val(Trim(strCurVer))
     nThisVer = Val(AutoUpdate.strThisVer)
  
     If nCurVer <= nThisVer Then
         currentversion = True
-        MsgBox ("up to date!")
+        'MsgBox ("up to date!")
     Else
-        MsgBox ("not up to date")
+        'MsgBox ("not up to date")
         currentversion = False
     End If
     Exit Function
 
-ErrOut:
+errout:
     MsgBox ("Error occured while checking for newest version of BDG")
 
 End Function
@@ -162,7 +161,7 @@ End Function
 Function getModuleNames() As Collection
 Dim modstr As Collection
 Set modstr = New Collection
-modData = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/Modules.txt")
+modData = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/Modules.txt")
 mystr = Split(modData, """")
 For Each Item In mystr
     If Len(Item) > 1 Then
@@ -171,3 +170,5 @@ For Each Item In mystr
 Next
 Set getModuleNames = modstr
 End Function
+
+
