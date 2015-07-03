@@ -1,4 +1,49 @@
-Attribute VB_Name = "FunctionModule"
+Function ReturnHost() As Variant
+ChDir "C:\"
+Set host = CreateObject("BZwhll.whllobj")
+retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+Set Wnd = host.Window()
+Wnd.Visible = True
+Wnd.Caption = "BDG is Searching"
+Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
+
+Set ReturnHost = host
+
+End Function
+
+Function GrabAWBlines(host As Variant)
+host.readscreen whatisthis, 4, 4, 61
+If Trim(whatisthis) = "" Then
+    whatisthis = "Normal"
+Else 'if not a normal piece get ID and PC count and put them in excel
+    host.readscreen idnum, 3, 4, 66
+    host.readscreen PCS, 3, 4, 77
+    Sheet3.Cells(16, 2).Value = idnum
+    Sheet3.Cells(16, 3).Value = PCS
+End If
+
+Sheet3.Cells(16, 1).Value = whatisthis
+bluerow = 6
+ERow = 17
+host.readscreen readline, 80, bluerow, 1
+linedata = "temp to not exit do"
+Do Until linedata = ""
+    host.readscreen readline, 80, bluerow, 1
+    linedata = Trim(readline)
+    If linedata = "" Then Exit Do
+    Sheet3.Cells(ERow, 1).Value = readline
+    host.readscreen miscdata, 3, 24, 2
+    If miscdata = "490" And bluerow = 11 Then
+        host.sendkey "@8"
+        host.waitready 1, 51
+        bluerow = 5
+    End If
+    bluerow = bluerow + 1
+    ERow = ERow + 1
+    
+Loop
+
+End Function
 
 Function AssignITSetup()
 
@@ -130,17 +175,17 @@ BORG.canSplit7.Value = Sheet3.Cells(9, 19).Value
 End Function
 
 
-Function Classfind(Raw As String)
+Function Classfind(raw As String)
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 '''Uses strings within excel to find class and subrisk'''''''''''''''''
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-If InStr(1, Raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then Exit Function
+If InStr(1, raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then Exit Function
 classposition = 0
 hazclass = ""
 
 Subend = 1
 
-SubClass = Array(", 1.4B, ", ", 1.4C, ", ", 1.4D, ", ", 1.4E, ", ", 1.4G, ", _
+Subclass = Array(", 1.4B, ", ", 1.4C, ", ", 1.4D, ", ", 1.4E, ", ", 1.4G, ", _
     ", 1.4S, ", ", 2.1, ", ", 2.2, ", ", 3, ", ", 4.1, ", ", 4.2, ", ", 4.3, ", _
     ", 5.1, ", ", 5.2, ", ", 6.1, ", ", 6.2, ", ", 7, ", ", 8, ", ", 9, ", ", 1.4B(", _
     ", 1.4C(", ", 1.4D(", ", 1.4E(", ", 1.4G(", ", 1.4S(", ", 2.1(", ", 2.2(", _
@@ -149,12 +194,12 @@ SubClass = Array(", 1.4B, ", ", 1.4C, ", ", 1.4D, ", ", 1.4E, ", ", 1.4G, ", _
 
 x = 0
 Do Until classposition > 1 Or x > 37
-    classposition = InStr(1, Raw, SubClass(x))
+    classposition = InStr(1, raw, Subclass(x))
     If classposition > 1 Then
         classposition = classposition + 1
             If x > 18 Then
             Do Until endcheck = ")"
-                endcheck = Mid(Raw, classposition + Subend, 1)
+                endcheck = Mid(raw, classposition + Subend, 1)
                 If endcheck = ")" Then Exit Do
                 Subend = Subend + 1
             Loop
@@ -164,7 +209,7 @@ Do Until classposition > 1 Or x > 37
                 hazclass = Classes(x)
                 Exit Do
             End If
-        hazclass = Mid(Raw, classposition + 1, classposition - (classposition - Subend))
+        hazclass = Mid(raw, classposition + 1, classposition - (classposition - Subend))
     End If
 x = x + 1
 Loop
@@ -175,9 +220,9 @@ Sheet3.Cells(16, 5).Value = hazclass
 
 End Function
 
-Function PSNfind(Raw As String)
-If InStr(1, Raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
-    If Left(Raw, 2) = "RQ" Then
+Function PSNfind(raw As String)
+If InStr(1, raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
+    If Left(raw, 2) = "RQ" Then
         RQ = "RQ - "
     Else
         RQ = ""
@@ -189,60 +234,60 @@ End If
 Start = 8
 classposition = Sheet3.Cells(16, 6).Value
 RQ = ""
-If Left(Raw, 2) = "RQ" Then
+If Left(raw, 2) = "RQ" Then
     Start = Start + 4
     RQ = "RQ - "
     End If
 If classposition = -1 Then classposition = 80
 
-PSN = (RQ + Mid(Raw, Start, (classposition - Start)))
+PSN = (RQ + Mid(raw, Start, (classposition - Start)))
 
 Sheet3.Cells(16, 4).Value = RQ + PSN
 PSNfind = Trim(PSN)
     
 End Function
 
-Function PGfind(Raw As String)
-If InStr(1, Raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
+Function PGfind(raw As String)
+If InStr(1, raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
     PG = "X"
     Sheet3.Cells(16, 7).Value = PG
     Exit Function
 End If
 PG = ""
-PGpos = 0
-If PGpos = 0 Then
-    If InStr(1, Raw, ", III,") > 1 Then
-        PGpos = InStr(1, Raw, ", III,")
+pgpos = 0
+If pgpos = 0 Then
+    If InStr(1, raw, ", III,") > 1 Then
+        pgpos = InStr(1, raw, ", III,")
         PG = "III"
     End If
 End If
 
-If PGpos = 0 Then
-    If InStr(1, Raw, ", II,") > 1 Then
-        PGpos = InStr(1, Raw, ", II,")
+If pgpos = 0 Then
+    If InStr(1, raw, ", II,") > 1 Then
+        pgpos = InStr(1, raw, ", II,")
         PG = "II"
     End If
 End If
 
-If PGpos = 0 Then
-    If InStr(1, Raw, ", I,") > 1 Then
-        PGpos = InStr(1, Raw, ", I,")
+If pgpos = 0 Then
+    If InStr(1, raw, ", I,") > 1 Then
+        pgpos = InStr(1, raw, ", I,")
         PG = "I"
     End If
 End If
 
 If PG = "" Then
     PG = "X"
-    PGpos = Sheet3.Cells(16, 6).Value
+    pgpos = Sheet3.Cells(16, 6).Value
     End If
 Sheet3.Cells(16, 7).Value = PG
-Sheet3.Cells(15, 7).Value = PGpos
+Sheet3.Cells(15, 7).Value = pgpos
 
 
 End Function
 
-Function WTfind(Raw As String)
-If InStr(1, Raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
+Function WTfind(raw As String)
+If InStr(1, raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then
     WTfind = Array("EQ", "EQ")
     Exit Function
 End If
@@ -251,7 +296,7 @@ WT = 0
 x = 0
 UM = 0
 Start = 0
-Last = 0
+last = 0
 classposition = Sheet3.Cells(16, 6).Value
 
 If Sheet3.Cells(16, 7).Value <> "X" Then
@@ -259,12 +304,13 @@ Start = Sheet3.Cells(15, 7).Value
 Else: Start = Sheet3.Cells(16, 6).Value + Len(Sheet3.Cells(16, 5))
 End If
 
-x = InStr(Start + 1, Raw, ",")
+If x < 0 Then x = 0
+x = InStr(Start + 1, raw, ",")
 Start = x
 'x = InStr(Start, Raw, ",")
 'Start = x
-Last = InStr(Start + 1, Raw, ",")
-WTUM = Mid(Raw, Start + 2, (Last - Start) - 2)
+last = InStr(Start + 1, raw, ",")
+WTUM = Mid(raw, Start + 2, (last - Start) - 2)
 
 spaceSearch = " "
 x = InStr(1, WTUM, spaceSearch)
@@ -276,16 +322,21 @@ WTfind = Array(WT, UM)
 
 End Function
 
-Function Num_Pcs(Raw As String)
+Function Num_Pcs(raw As String)
 On Error GoTo errorout
-x = InStr(1, Raw, " PIECE")
+x = InStr(1, raw, " PIECE")
+If x < 1 Then
+    Num_Pcs = 1
+    Exit Function
+End If
+
 y = 1
 Do Until commacheck = ","
-    commacheck = Mid(Raw, x - y, 1)
+    commacheck = Mid(raw, x - y, 1)
     y = y + 1
 Loop
 
-Num_Pcs = Mid(Raw, x - y + 3, y - 3)
+Num_Pcs = Mid(raw, x - y + 3, y - 3)
 Exit Function
 
 errorout:
@@ -296,7 +347,7 @@ End Function
 
 Function GhostList() As Boolean
 
-On Error GoTo ErrOut
+On Error GoTo errout
 
 Dim index As Integer
 Dim inList As Boolean
@@ -315,7 +366,7 @@ Next
 GhostList = True
 Exit Function
 
-ErrOut:
+errout:
 GhostList = False
 End Function
 
