@@ -1,4 +1,3 @@
-Attribute VB_Name = "GhostAssign"
 Dim canarr() As Variant
 Dim splarr() As Variant
 Dim destarr() As Variant
@@ -252,8 +251,13 @@ End If
 
 Call DGscreenChooser("assign", host)
 
-host.readscreen miscdata, 15, 3, 32
-If miscdata <> "UNASSIGNED VIEW" Then host.sendkey "@2"
+host.readscreen miscdata, 15, 3, 34
+If miscdata <> "UNASSIGNED VIEW" Then
+    host.sendkey "@2"
+    host.waitready 1, 51
+End If
+
+CanAssign = "UnAssigned"
 
 row = 10
 
@@ -272,7 +276,7 @@ Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
         Sheet1.Cells(excelrow, 3).Value = Right(awbfull, 4) 'get last 4 for our filter
     
         Sheet1.Cells(excelrow, 23).Value = haztype
-        CanAssign = "UnAssigned"
+        
         
         Sheet1.Cells(excelrow, 13).Value = CanAssign
         BORG.labelUpdater.Caption = "Doing work in the Assign Screen..." & "Grabbing " & (excelrow - 2) & " Pieces"
@@ -399,27 +403,27 @@ Function GetMaxRow() As Integer
 End Function
 
 Function SetCanFilter(can As String) As Boolean
-On Error GoTo ErrOut:
+On Error GoTo errout:
     Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:=can, Operator:=xlAnd
     SetCanFilter = True
     Exit Function
     
-ErrOut:
+errout:
     SetCanFilter = False
 End Function
 
 Function hideAssignedPcs() As Boolean
-On Error GoTo ErrOut:
+On Error GoTo errout:
     Sheet1.Range("$A$2:$X$2").AutoFilter Field:=21, Criteria1:="=", Operator:=xlAnd
     hideAssignedPcs = True
     Exit Function
     
-ErrOut:
+errout:
     hideAssignedPcs = False
 End Function
 
 Function setSplitFilter(Split As String, isLocal As Boolean) As Boolean
-On Error GoTo ErrOut:
+On Error GoTo errout:
     If isLocal = False Then
         splitFilter = "=" + Split + "*"
         'Sheet1.Range("$A$2:$X$2").AutoFilter Field:=6, Criteria1:="=N*", Operator:=xlAnd
@@ -432,7 +436,7 @@ On Error GoTo ErrOut:
         setSplitFilter = True
         Exit Function
     End If
-ErrOut:
+errout:
     setSplitFilter = False
 End Function
 
