@@ -1,4 +1,3 @@
-Attribute VB_Name = "ViewAWB"
 Dim host As Variant
 Dim row As Integer
 Dim excelrow As Integer
@@ -34,14 +33,14 @@ row = 17
   
 host.waitready 1, 51
 
-Special = 0
+special = 0
 If Sheet1.Cells(excelrow, 16).Value > 0 Then
     'Call ViewAWB.VerifyOP(host)
-    Special = 1
+    special = 1
     End If
 If Sheet1.Cells(excelrow, 14).Value > 0 Then
     'Call ViewAWB.VerifyALPK(host)
-    Special = 1
+    special = 1
     End If
 'If Special = 0 Then Call ViewAWB.VerifyAWB(host)
 
@@ -58,11 +57,11 @@ Call ViewAWB.VAWB_Class
 Call ViewAWB.VAWB_PSN
 If BORG.Can_flight.Value = True Then Call ViewAWB.canflight
 
-'If Sheet3.Cells(16, 1).Value <> "Normal" Then
+If special = 1 Then
     Call ViewAWB.VAWB_PG
     Call ViewAWB.VAWB_WT(host)
-If Special = 1 Then Call ViewAWB.NumPcs
-'End If
+    Call ViewAWB.NumPcs
+End If
 
 Increment:
 row = row + 1
@@ -93,7 +92,7 @@ Start = 1
         Sheet3.Cells(16, 5).Value = "0"
         GoTo hazclassAssign
     End If
-    Classfind (Sheet3.Cells(row, 2).Value)
+    FunctionModule.Classfind (Sheet3.Cells(row, 2).Value)
      
 hazclassAssign:
      hazclass = Sheet3.Cells(16, 5).Value
@@ -104,7 +103,7 @@ hazclassAssign:
 End Sub 'end class sub
 
 Sub VAWB_PSN()
-    PSN = PSNfind(Sheet3.Cells(row, 2).Value)
+    PSN = FunctionModule.PSNfind(Sheet3.Cells(row, 2).Value)
     If Sheet3.Cells(16, 1).Value <> "Normal" Then
        Sheet1.Cells(excelrow + (row - 17), 5).Value = PSN
     Else: Sheet1.Cells(excelrow, 5).Value = PSN
@@ -112,7 +111,7 @@ Sub VAWB_PSN()
 End Sub 'end psn sub
 
 Sub VAWB_PG()
-PGfind (Sheet3.Cells(row, 2).Value)
+FunctionModule.PGfind (Sheet3.Cells(row, 2).Value)
 PG = Sheet3.Cells(16, 7).Value
 
 If Sheet3.Cells(16, 1).Value <> "Normal" Then
@@ -216,6 +215,8 @@ awbcheck = 0
 bluerow = 6
 lineread = 0
 firstrun = 0
+startTime = Minute(Time()) + (0.01 * Second(Time()))
+
 If excelrow = 0 Then
     excelrow = Sheet3.Cells(2, 1).Value
 End If
@@ -295,6 +296,10 @@ If PSNTEMP = "RADIOACTIV" Or PSNTEMP = "Radioactive, Excepted Qty" Then PSNTEMP 
             End If
         End If
     End If
+    
+    curtime = Minute(Time()) + (0.01 * Second(Time()))
+    If Abs(curtime - startTime) > 0.1 Then Exit Sub
+    
     If verify = 0 Then
         host.sendkey "@2"
         host.waitready 1, 51
@@ -311,6 +316,7 @@ OP_ID = 0
 OPpcs = 0
 URSAcheck = 0
 firstrun = 0
+startTime = Minute(Time()) + (0.01 * Second(Time()))
 GoTo verifyingOP
 
 SearchVAWB_OP:
@@ -341,6 +347,10 @@ verifyingOP:
                 Exit Do
         End If
     End If
+    
+    curtime = Minute(Time()) + (0.01 * Second(Time()))
+    If Abs(curtime - startTime) > 0.1 Then Exit Sub
+    
 If verify = 0 Then
     host.sendkey "@2"
     host.waitready 1, 51
@@ -359,6 +369,7 @@ ALPK_ID = 0
 ALPKpcs = 0
 URSAcheck = 0
 firstrun = 0
+startTime = Minute(Time()) + (0.01 * Second(Time()))
 
 GoTo VerifyingAWB_ALPK
 SearchVAWB:
@@ -387,7 +398,8 @@ VerifyingAWB_ALPK:
                 Exit Do
         End If
     End If
-    
+    curtime = Minute(Time()) + (0.01 * Second(Time()))
+    If Abs(curtime - startTime) > 0.1 Then Exit Sub
     If verify = 0 Then
         host.sendkey "@2"
         host.waitready 1, 51
@@ -458,36 +470,4 @@ Sheet1.Cells(excelrow, 2).Value = Trim(Origin) 'Grab origin station of piece. Or
     If Sheet1.Cells(excelrow, 12) = "" Then Sheet1.Cells(excelrow, 12).Value = 6
 
 End Sub 'end origin sub
-Function GrabAWBlines(host As Variant)
-host.readscreen whatisthis, 4, 4, 61
-If Trim(whatisthis) = "" Then
-    whatisthis = "Normal"
-Else 'if not a normal piece get ID and PC count and put them in excel
-    host.readscreen idnum, 3, 4, 66
-    host.readscreen PCS, 3, 4, 77
-    Sheet3.Cells(16, 2).Value = idnum
-    Sheet3.Cells(16, 3).Value = PCS
-End If
 
-Sheet3.Cells(16, 1).Value = whatisthis
-bluerow = 6
-ERow = 17
-host.readscreen readline, 80, bluerow, 1
-linedata = "temp to not exit do"
-Do Until linedata = ""
-    host.readscreen readline, 80, bluerow, 1
-    linedata = Trim(readline)
-    If linedata = "" Then Exit Do
-    Sheet3.Cells(ERow, 1).Value = readline
-    host.readscreen miscdata, 3, 24, 2
-    If miscdata = "490" And bluerow = 11 Then
-        host.sendkey "@8"
-        host.waitready 1, 51
-        bluerow = 5
-    End If
-    bluerow = bluerow + 1
-    ERow = ERow + 1
-    
-Loop
-
-End Function
