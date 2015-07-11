@@ -1,0 +1,135 @@
+Option Compare Text
+Function openBlueZoneSession() As Variant
+
+Set host = CreateObject("BZwhll.whllobj")
+retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
+host.WaitCursor 1, 9, 1, 1
+Set Wnd = host.Window()
+Wnd.Visible = True
+Wnd.Caption = "BDG Window"
+Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
+host.waitready 1, 500
+Set openBlueZoneSession = host
+
+End Function
+
+Function BZreadscreen(host As Variant, x As Integer, y As Integer, length As Integer, Optional wait As Boolean = True) As String
+On Error GoTo erroutread
+read:
+host.readscreen BZdata, length, x, y
+If wait = True Then host.waitready 1, 51
+BZreadscreen = BZdata
+Exit Function
+erroutread:
+    If Err.Number = "424" Then
+        Set host = openBlueZoneSession
+        GoTo read
+    Else
+        MsgBox ("error" & Err.Number & " in bzreadscreen")
+    End If
+    
+End Function
+Sub testcaller()
+Set host = openBlueZoneSession
+x = BZwritescreen(host, "text", 1, 1)
+x = BZreadscreen(host, 1, 1, 1)
+
+End Sub
+Function BZwritescreen(host As Variant, text As String, x As Integer, y As Integer, Optional wait As Boolean = True)
+On Error GoTo erroutwrite
+
+writeme:
+If TypeName(host) = "IWhllObj" Then
+    host.writescreen text, x, y
+    If wait = True Then host.waitready 1, 51
+Else
+    MsgBox ("error" & Err.Number & " in bzwritescreen")
+End If
+Exit Function
+erroutwrite:
+    If Err.Number = "424" Then
+        Set host = openBlueZoneSession
+        GoTo writeme
+    Else
+        MsgBox ("error" & Err.Number & " in bzreadscreen")
+    End If
+    
+End Function
+
+Function BZsendKey(host As Variant, text As String, Optional wait As Boolean = True)
+On Error GoTo erroutSend
+host.sendkey text
+If wait = True Then host.waitready 1, 51
+Exit Function
+erroutSend:
+End Function
+
+Sub BZgotoAUTOdg(host As Variant)
+'checks to see if we are connected to a bluezone session if so
+'regardless of current position in system will get us to the DG section of the mainframe display
+If BZmodule.BZConnected(host) Then
+    
+End If
+End Sub
+
+Sub BZLogin(host As Variant, EmpNum As String, password As String)
+'
+
+End Sub
+
+Function DGscreenChooser(menu As String, host As Variant) As Boolean
+ 
+On Error GoTo erroutScreenChoice
+
+host.readscreen DGscreenInfo, 50, 1, 20
+If InStr(1, DGscreenInfo, "DANGEROUS GOODS SYSTEM") >= 1 Then
+    host.writescreen menu, 2, 17
+    host.sendkey "@E"
+    host.waitready 1, 51
+Else
+    host.sendkey "@C"                       'clears screen in IMS
+    host.sendkey "asap@e"                   'types ASAP and enters command
+    host.waitready 1, 51
+    host.readscreen miscdata, 32, 1, 2
+    If miscdata = "ASAP COMMAND IS UNKNOWN TO VTAM." Then
+        Call BZLogin
+    End If
+    host.sendkey "68@e"                     'enters 26 for dg training
+    host.waitready 1, 51
+    host.writescreen menu, 2, 17              'enters assign into first field to bring us to assign screen
+    host.writescreen BORG.Location.text, 19, 44   'inputs the location ID in DGinput into station
+    If BORG.printerID <> "" Then host.writescreen BORG.printerID, 21, 32
+    host.sendkey "@e"                       'sends enter key to bring us finally to Assign Screen
+    host.waitready 1, 51
+End If
+
+host.readscreen retCode, 3, 24, 2
+If retCode = "136" Then
+    host.writescreen BORG.Location.text, 19, 44
+End If
+DGscreenChooser = True
+Exit Function
+
+erroutScreenChoice:
+MsgBox (Err.Number & " error occured in dgscreenchooser sub")
+DGscreenChooser = False
+End Function
+Function BZConnected(host) As Boolean
+If TypeName(host) = "" Then
+    terminal = ""
+    host.readscreen terminal, 80, 1, 1
+    If InStr(1, terminal, "TERMINAL INACTIVE") > 1 Then
+        CloseSession (host)
+        BZConnected = False
+    Else
+        BZConnected = True
+    End If
+Else
+    BZConnected = False
+End If
+End Function
+Sub CloseSession(host As Variant)
+BORG.labelUpdater.Caption = "Closing IMS..."
+host.CloseSession 0, 11
+BORG.labelUpdater.Caption = "Done!"
+End Sub
