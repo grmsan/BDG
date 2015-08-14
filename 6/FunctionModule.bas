@@ -1,23 +1,13 @@
-Function ReturnHost() As Variant
-ChDir "C:\"
-Set host = CreateObject("BZwhll.whllobj")
-retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
-Set Wnd = host.Window()
-Wnd.Visible = True
-Wnd.Caption = "BDG is Searching"
-Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
 
-Set ReturnHost = host
+Function GrabAWBlines()
+Dim bluerow As Integer
 
-End Function
-
-Function GrabAWBlines(host As Variant)
-host.readscreen whatisthis, 4, 4, 61
+whatisthis = BZreadscreen(4, 4, 61)
 If Trim(whatisthis) = "" Then
     whatisthis = "Normal"
 Else 'if not a normal piece get ID and PC count and put them in excel
-    host.readscreen idnum, 3, 4, 66
-    host.readscreen PCS, 3, 4, 77
+    idnum = BZreadscreen(3, 4, 66)
+    PCS = BZreadscreen(3, 4, 77)
     Sheet3.Cells(16, 2).Value = idnum
     Sheet3.Cells(16, 3).Value = PCS
 End If
@@ -25,22 +15,20 @@ End If
 Sheet3.Cells(16, 1).Value = whatisthis
 bluerow = 6
 ERow = 17
-host.readscreen readline, 80, bluerow, 1
+readline = BZreadscreen(80, bluerow, 1)
 linedata = "temp to not exit do"
 Do Until linedata = ""
-    host.readscreen readline, 80, bluerow, 1
+    readline = BZreadscreen(80, bluerow, 1)
     linedata = Trim(readline)
     If linedata = "" Then Exit Do
     Sheet3.Cells(ERow, 1).Value = readline
-    host.readscreen miscdata, 3, 24, 2
+    miscdata = BZreadscreen(3, 24, 2)
     If miscdata = "490" And bluerow = 11 Then
-        host.sendkey "@8"
-        host.waitready 1, 51
+        Call BZsendKey("@8")
         bluerow = 5
     End If
     bluerow = bluerow + 1
     ERow = ERow + 1
-    
 Loop
 
 End Function
@@ -98,7 +86,7 @@ excelcol = 3
 With cannum
     .Clear
     .AddItem ""
-Do Until Sheet6.Cells(2, excelcol).Text = ""
+Do Until Sheet6.Cells(2, excelcol).text = ""
     .AddItem Sheet6.Cells(2, excelcol)
     excelcol = excelcol + 1
 Loop
@@ -429,7 +417,7 @@ Function UpdateSplitList()
 BORG.combo_splitName.Clear
 col = 2
 Do Until Sheet6.Cells(2, col) = ""
-    BORG.combo_splitName.AddItem Sheet6.Cells(2, col).Text
+    BORG.combo_splitName.AddItem Sheet6.Cells(2, col).text
     col = col + 1
 Loop
 End Function
@@ -482,3 +470,5 @@ row = row + 1
 Loop
 
 End Function
+
+
