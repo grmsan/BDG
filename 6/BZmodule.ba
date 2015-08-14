@@ -46,7 +46,6 @@ Set host = openBlueZoneSession
 host.readscreen text, 12, 10, 10
 Call BZwritescreen("text", 11, 25)
 x = BZreadscreen(5, 5, 5)
-
 Call BZsendKey("@C")
 
 End Sub
