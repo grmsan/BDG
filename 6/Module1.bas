@@ -1,3 +1,4 @@
+
 Sub getstarted()
 Sheets("CanManifest").Activate
 Module1.DEL
@@ -66,5 +67,6 @@ Sub DELmanifestSheet() 'Clear up old manifest data on SortMen screen
     Sheet2.Rows("6:9999").Clear
     Sheet2.Cells(4, 1) = ""
 End Sub
+
 
 
