@@ -9,6 +9,5 @@
 "SplitCentral"
 "FlexAssign"
 "VAWB"
-"AutoUpdate"
 "BZmodule"
 "FormsHandler"
