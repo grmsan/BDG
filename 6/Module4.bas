@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 Attribute VB_Name = "Module4"
-=======
->>>>>>> origin/master
 
 Sub EQfix()
 EQrow = 3
@@ -415,8 +412,5 @@ Call Module4.pieceCount
 End Sub
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/master

@@ -1,19 +1,12 @@
-<<<<<<< HEAD
 Attribute VB_Name = "OpenBlueZone"
-=======
->>>>>>> origin/master
 
 Dim excelrow As Integer
 Option Compare Text
 
 Sub BZOpenSession()
 BZinit 'initialize and connect to bluezone session
-<<<<<<< HEAD
 res = DGscreenChooser("close")
 If res = False Then Exit Sub
-=======
-Call DGscreenChooser("close")
->>>>>>> origin/master
 'Call BZLogin(BORG.EmpNum, BORG.PasswordBox)
 Call GrabCloseScreen
 
@@ -156,10 +149,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
     Do Until cannum = "          "
         intCol = col(i)
         cannum = BZreadscreen(10, row, intCol)
-<<<<<<< HEAD
         If Trim(cannum) = "" Then Exit Do
-=======
->>>>>>> origin/master
         STA = BZreadscreen(5, row, intCol + 11)
         Status = BZreadscreen(1, row, intCol + 18)
         If cannum = "          " Then
@@ -235,11 +225,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
                 ErrorCode = BZreadscreen(3, 24, 2)
                 If ErrorCode = "469" Then
                     ErrorCode = BZreadscreen(3, 24, 2)
-<<<<<<< HEAD
                     BORG.labelUpdater.Caption = ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION"
-=======
-                    MsgBox (ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION")
->>>>>>> origin/master
                     Call BZwritescreen(" ", row, tempcol - 3)
                 End If
                 If ErrorCode = "057" Then
@@ -287,11 +273,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
                 ErrorCode = BZreadscreen(3, 24, 2)
                 If ErrorCode = "469" Then
                     ErrorCode = BZreadscreen(25, 24, 20)
-<<<<<<< HEAD
                     BORG.labelUpdater.Caption = "ERROR: " & ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION"
-=======
-                    MsgBox (ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION")
->>>>>>> origin/master
                 End If
                 Exit Function
             Else
@@ -336,7 +318,6 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
             Call BZsendKey("@e")
             ErrorCode = BZreadscreen(3, 24, 2)
             If ErrorCode = "279" Then
-<<<<<<< HEAD
                 BORG.labelUpdater.Caption = "Can is already Closed!"
                 Call BZwritescreen(" ", row, tempcol - 3)
             ElseIf ErrorCode = "057" Then
@@ -344,15 +325,6 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
             ElseIf ErrorCode = "470" Then
                 ErrorCode = BZreadscreen(50, 24, 20)
                 BORG.labelUpdater.Caption = Error & vbNewLine & "Flight has not yet arrived in the system yet"
-=======
-                MsgBox ("Can is already Closed!")
-                Call BZwritescreen(" ", row, tempcol - 3)
-            ElseIf ErrorCode = "057" Then
-                MsgBox (cannum & " opened successfully")
-            ElseIf ErrorCode = "470" Then
-                ErrorCode = BZreadscreen(50, 24, 20)
-                MsgBox (Error & vbNewLine & "Flight has not yet arrived in the system yet")
->>>>>>> origin/master
             ElseIf ErrorCode = "068" Then
                 Call BZsendKey("YM")
                 Call BZsendKey("@E")
@@ -363,11 +335,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
                 Call BZsendKey(printer)
                 Call BZsendKey("@E")
             ElseIf ErrorCode = "548" Then
-<<<<<<< HEAD
                 BORG.labelUpdater.Caption = cannum & " needs to be reconciled before closed."
-=======
-                MsgBox (cannum & " needs to be reconciled before closed.")
->>>>>>> origin/master
             End If
             ErrorCode = BZreadscreen(3, 24, 2)
             If ErrorCode = "083" Then
@@ -413,11 +381,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
                 ErrorCode = BZreadscreen(3, 24, 2)
                 If ErrorCode = "547" Then
                     ErrorCode = BZreadscreen(3, 24, 2)
-<<<<<<< HEAD
                     BORG.labelUpdater.Caption = ErrorCode & vbNewLine & "Asset is Closed and must be open to be reconciled"
-=======
-                    MsgBox (ErrorCode & vbNewLine & "Asset is Closed and must be open to be reconciled")
->>>>>>> origin/master
                 End If
                 Exit Function
             Else
@@ -435,11 +399,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
 End If
 End Function
 
-<<<<<<< HEAD
 Function AddIce(can As String)
-=======
-Function AddIce(can As Variant)
->>>>>>> origin/master
 Dim row As Integer
 Dim colint As Integer
 Dim cannum As String
@@ -496,11 +456,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" And userinput = 0 Then
             Call BZsendKey("@6")
             read_error = BZreadscreen(3, 24, 2)
             If read_error = "053" Then
-<<<<<<< HEAD
                 BORG.labelUpdater.Caption = ice & " ice has been assigned to " & cannum
-=======
-                MsgBox (ice & " ice has been assigned to " & cannum)
->>>>>>> origin/master
                 Exit Do
             End If
             
@@ -585,8 +541,5 @@ End Sub
 
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/master

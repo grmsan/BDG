@@ -1,3 +1,4 @@
+Attribute VB_Name = "famis"
 Dim host As Variant
 Private Declare Function MessageBox _
 Lib "User32" Alias "MessageBoxA" _

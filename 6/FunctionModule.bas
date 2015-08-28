@@ -1,37 +1,4 @@
-
-Function GrabAWBlines()
-Dim bluerow As Integer
-
-whatisthis = BZreadscreen(4, 4, 61)
-If Trim(whatisthis) = "" Then
-    whatisthis = "Normal"
-Else 'if not a normal piece get ID and PC count and put them in excel
-    idnum = BZreadscreen(3, 4, 66)
-    PCS = BZreadscreen(3, 4, 77)
-    Sheet3.Cells(16, 2).Value = idnum
-    Sheet3.Cells(16, 3).Value = PCS
-End If
-
-Sheet3.Cells(16, 1).Value = whatisthis
-bluerow = 6
-ERow = 17
-readline = BZreadscreen(80, bluerow, 1)
-linedata = "temp to not exit do"
-Do Until linedata = ""
-    readline = BZreadscreen(80, bluerow, 1)
-    linedata = Trim(readline)
-    If linedata = "" Then Exit Do
-    Sheet3.Cells(ERow, 1).Value = readline
-    miscdata = BZreadscreen(3, 24, 2)
-    If miscdata = "490" And bluerow = 11 Then
-        Call BZsendKey("@8")
-        bluerow = 5
-    End If
-    bluerow = bluerow + 1
-    ERow = ERow + 1
-Loop
-
-End Function
+Attribute VB_Name = "FunctionModule"
 
 Function GrabAWBlines()
 Dim bluerow As Integer
@@ -506,8 +473,5 @@ Loop
 End Function
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/master

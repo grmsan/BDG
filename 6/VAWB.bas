@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 Attribute VB_Name = "VAWB"
-=======
->>>>>>> origin/master
 
 Dim row As Integer
 Dim excelrow As Integer
@@ -39,17 +36,10 @@ Do Until Sheet3.Cells(row, 2).Value = ""
     unpos = VAWB_UN_RQ(raw, excelrow, row, special)
     clspos = VAWB.VAWB_Class(raw, excelrow, row, special)
     Call VAWB.VAWB_PSN(raw, excelrow, row, unpos, clspos, special)
-<<<<<<< HEAD
     Call VAWB.VAWB_WT(raw, excelrow, row, special, clspos)
     If special = 1 Then
         Call VAWB.VAWB_PG(raw, excelrow, row, clspos)
         
-=======
-    
-    If special = 1 Then
-        Call VAWB.VAWB_PG(raw, excelrow, row, clspos)
-        Call VAWB.VAWB_WT(raw, excelrow, row, special, clspos)
->>>>>>> origin/master
         Call VAWB.NumPcs(raw, excelrow, row, special)
     End If
     
@@ -115,7 +105,6 @@ verifyingOP:
     If OP_ID <> "   " And OPpcs <> "   " Then
         OP_ID = CInt(OP_ID)
         OPpcs = CInt(OPpcs)
-<<<<<<< HEAD
         u = Trim(Sheet1.Cells(excelrow, 6).Value)
         ul = Trim(URSAcheck)
         uu = Sheet1.Cells(excelrow, datarow).Value
@@ -124,17 +113,6 @@ verifyingOP:
         uuul = OPpcs
         If (Trim(Sheet1.Cells(excelrow, 6).Value) = Trim(URSAcheck)) _
         And (Sheet1.Cells(excelrow, datarow).Value = OP_ID) Then
-=======
-'        u = Trim(Sheet1.Cells(excelrow, 6).Value)
-'        ul = Trim(URSAcheck)
-'        uu = Sheet1.Cells(excelrow, datarow).Value
-'        uul = OP_ID
-'        uuu = Sheet1.Cells(excelrow, datarow).Value
-'        uuul = OPpcs
-        If (Trim(Sheet1.Cells(excelrow, 6).Value) = Trim(URSAcheck)) _
-        And (Sheet1.Cells(excelrow, datarow).Value = OP_ID) _
-        And (Sheet1.Cells(excelrow, datarow + 1).Value = OPpcs) Then
->>>>>>> origin/master
             verify = 1
             Exit Do
         End If
@@ -672,8 +650,5 @@ errout:
     & "help context: " & Err.HelpContext)
 End Function
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> origin/master

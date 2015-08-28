@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 Attribute VB_Name = "Module1"
-=======
->>>>>>> origin/master
 
 Sub getstarted()
 Sheets("CanManifest").Activate
@@ -81,7 +78,4 @@ End Sub
 
 
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/master
