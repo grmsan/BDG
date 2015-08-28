@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 Attribute VB_Name = "AutoUpdate"
 Public Const strThisVer As String = "6.02"
+=======
+Public Const strThisVer As String = "6.00"
+>>>>>>> origin/master
 
 Public Const strFileName As String = "BDG"
 
@@ -102,8 +106,12 @@ Sub CreateModList()
         End If
     Next
     
+<<<<<<< HEAD
     'myFile = Application.DefaultFilePath & "\Modules.txt"
     myFile = Application.ActiveWorkbook.Path & "\Modules.txt"
+=======
+    myFile = Application.DefaultFilePath & "\Modules.txt"
+>>>>>>> origin/master
     'myFile = "C:\Learning-Repo\BDG\Modules.txt"
     Open myFile For Output As #1
     
@@ -177,6 +185,7 @@ Set getModuleNames = modstr
 End Function
 
 
+<<<<<<< HEAD
 Sub quickModuleExport()
      ' reference to extensibility library
     Dim objMyProj As VBProject
@@ -191,3 +200,5 @@ Sub quickModuleExport()
         End If
     Next
 End Sub
+=======
+>>>>>>> origin/master

@@ -5,6 +5,7 @@
 "testModule"
 "FunctionModule"
 "GhostAssign"
+<<<<<<< HEAD
 "famis"
 "SplitCentral"
 "FlexAssign"
@@ -12,3 +13,10 @@
 "AutoUpdate"
 "BZmodule"
 "FormsHandler"
+=======
+"OpenBlueZone"
+"SplitCentral"
+"VAWB"
+"BZmodule"
+"testModule"
+>>>>>>> origin/master

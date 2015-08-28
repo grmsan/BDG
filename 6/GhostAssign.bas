@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 Attribute VB_Name = "GhostAssign"
+=======
+>>>>>>> origin/master
 
 Dim canarr() As Variant
 Dim splarr() As Variant
@@ -125,6 +128,7 @@ RestartSession:
     
 End Function
 
+<<<<<<< HEAD
 Function GrabAssign(Optional can As String = "", Optional haztype As String = " ", Optional excelrow As Integer = 3) As Integer
 
 Call DGscreenChooser("assign")
@@ -143,6 +147,18 @@ Else
     canassign = can
 End If
 
+=======
+Function GrabAssign(Optional haztype As String = " ", Optional excelrow As Integer = 3) As Integer
+
+Call DGscreenChooser("assign")
+
+miscdata = BZreadscreen(15, 3, 34)
+If miscdata <> "UNASSIGNED VIEW" Then
+    Call BZsendKey("@2")
+End If
+
+CanAssign = "UnAssigned"
+>>>>>>> origin/master
 Dim row As Integer
 row = 10
 If haztype <> "" Then
@@ -150,20 +166,35 @@ If haztype <> "" Then
     Call BZsendKey("@E", True)
 End If
 
+<<<<<<< HEAD
 SeqFinished = BZreadscreen(26, 24, 2)
+=======
+Call BZwritescreen(haztype, 6, 45)
+Call BZsendKey("@E")
+SeqFinished = BZreadscreen(26, 24, 2)
+
+>>>>>>> origin/master
 
 Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
     If Left(SeqFinished, 3) = "256" Then Exit Do
     'canassigned = BZreadscreen(10, row, 26)
     fullinfo = BZreadscreen(76, row, 5)
+<<<<<<< HEAD
     canassigned = Trim(Mid(fullinfo, 23, 10))
     If Trim(canassigned) = canassign Then
+=======
+    If Trim(canassigned) = "" Then
+>>>>>>> origin/master
         awbfull = BZreadscreen(12, row, 5)
         If Trim(awbfull) = "" Then Exit Do
         Sheet1.Cells(excelrow, 1).Value = awbfull
         Sheet1.Cells(excelrow, 3).Value = Right(awbfull, 4) 'get last 4 for our filter
         Sheet1.Cells(excelrow, 23).Value = haztype
+<<<<<<< HEAD
         Sheet1.Cells(excelrow, 13).Value = canassign
+=======
+        Sheet1.Cells(excelrow, 13).Value = CanAssign
+>>>>>>> origin/master
         
         BORG.labelUpdater.Caption = "Doing work in the Assign Screen..." & "Grabbing " & (excelrow - 2) & " Pieces"
         UNnum = "UN" & Mid(fullinfo, 40, 4)
@@ -513,5 +544,8 @@ End Sub
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/master

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 Attribute VB_Name = "SplitCentral"
+=======
+>>>>>>> origin/master
 
 Dim excelcol As Integer
 Dim excelrow As Integer
@@ -182,5 +185,8 @@ Loop
 End Sub
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/master

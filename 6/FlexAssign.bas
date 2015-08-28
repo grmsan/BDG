@@ -1,4 +1,3 @@
-Attribute VB_Name = "FlexAssign"
 
 Dim cannum As Variant
 Dim canType As Variant
@@ -273,5 +272,8 @@ End If
 End Function
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/master
