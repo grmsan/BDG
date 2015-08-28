@@ -1,4 +1,5 @@
 Attribute VB_Name = "Module1"
+
 Sub getstarted()
 Sheets("CanManifest").Activate
 Module1.DEL
@@ -19,6 +20,13 @@ Sub DEL()
     Sheet2.Rows("6:9999").Clear
     Sheet3.Rows("16:9999").Clear
     Sheet2.Cells(4, 1) = ""
+    myrow = 3
+    Do Until Sheet3.Cells(myrow, 12) = ""
+        Sheet3.Cells(myrow, 12).Clear
+        Sheet3.Cells(myrow, 13).Clear
+        Sheet3.Cells(myrow, 14).Clear
+        myrow = myrow + 1
+    Loop
     'Selection.Delete Shift:=xlUp
     'Sheet2.Cells(1, 1).Select
 End Sub
@@ -67,4 +75,7 @@ Sub DELmanifestSheet() 'Clear up old manifest data on SortMen screen
     Sheet2.Rows("6:9999").Clear
     Sheet2.Cells(4, 1) = ""
 End Sub
+
+
+
 

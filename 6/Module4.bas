@@ -1,9 +1,10 @@
 Attribute VB_Name = "Module4"
+
 Sub EQfix()
 EQrow = 3
 Do Until Sheet1.Cells(EQrow, 1).Value < 1
-If Sheet1.Cells(EQrow, 4) = "UN2911" Or Sheet1.Cells(EQrow, 4) = "UN2910" Or _
-    Sheet1.Cells(EQrow, 4) = "UN2909" Or Sheet1.Cells(EQrow, 4) = "UN2908" Then
+If Sheet1.Cells(EQrow, 4) = "2911" Or Sheet1.Cells(EQrow, 4) = "2910" Or _
+    Sheet1.Cells(EQrow, 4) = "2909" Or Sheet1.Cells(EQrow, 4) = "2908" Then
         Sheet1.Cells(EQrow, 5).Value = "Radioactive, Excepted Qty"
         Sheet1.Cells(EQrow, 7).Value = "EQ"
         Sheet1.Cells(EQrow, 10).Value = "EQ"
@@ -27,7 +28,6 @@ End Sub
 
 
 Sub SORT_MACRO()
-Attribute SORT_MACRO.VB_ProcData.VB_Invoke_Func = " \n14"
 Sheet1.Columns("A:A").NumberFormat = "000000000000"
 Sheet1.Columns("C:C").NumberFormat = "0000"
         ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
@@ -349,7 +349,7 @@ If Sheet1.Cells(x, 1).EntireRow.Hidden = False Then
             End With
             End With
             '-------------- merge and put incoming dg from "station ursa"
-            Sheet2.Range(Cells(TwoRow, 1), Cells(TwoRow, col + 8)).Value = str + URSA + str2 + Sheet1.Cells(x, 20).Text
+            Sheet2.Range(Cells(TwoRow, 1), Cells(TwoRow, col + 8)).Value = str + URSA + str2 + Sheet1.Cells(x, 20).text
         End If 'If URSA = oldURSA end
         
     TwoRow = TwoRow + 1 'increase row usage on canManifest screen
@@ -386,8 +386,8 @@ Sub pieceCount()
 TotalPieces = 0
 row = 6
 
-Do Until Sheet2.Cells(row, 4).Text + Sheet2.Cells(row + 1, 4).Text + Sheet2.Cells(row + 2, 4).Text = ""
-n = Sheet2.Cells(row, 4).Text + Sheet2.Cells(row + 1, 4).Text + Sheet2.Cells(row + 2, 4).Text
+Do Until Sheet2.Cells(row, 4).text + Sheet2.Cells(row + 1, 4).text + Sheet2.Cells(row + 2, 4).text = ""
+n = Sheet2.Cells(row, 4).text + Sheet2.Cells(row + 1, 4).text + Sheet2.Cells(row + 2, 4).text
 u = Right(Sheet2.Cells(row, 2).Value, 4)
 If u <> "" Then
     If CInt(u) > 1 Then
@@ -410,3 +410,7 @@ BORG.labelUpdater.Caption = "Counting Pieces"
 Call Module4.pieceCount
 
 End Sub
+
+
+
+

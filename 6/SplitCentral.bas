@@ -1,4 +1,5 @@
 Attribute VB_Name = "SplitCentral"
+
 Dim excelcol As Integer
 Dim excelrow As Integer
 
@@ -17,8 +18,8 @@ End Sub
 Sub loadsplits(SplitName As String)
 excelrow = 5
 excelcol = 2
-Do Until Sheet6.Cells(2, excelcol).Text = SplitName
-    If Sheet6.Cells(2, excelcol).Text = "" Then
+Do Until Sheet6.Cells(2, excelcol).text = SplitName
+    If Sheet6.Cells(2, excelcol).text = "" Then
         sortmen.Height = 126.75
         Exit Sub
     End If
@@ -35,11 +36,11 @@ Sub AddSplits(mstrSplit As String, subSplit As String, isPrefix As Boolean)
 excelcol = 2
 excelrow = 5
 subSplit = UCase(subSplit)
-Do Until Sheet6.Cells(2, excelcol).Text = mstrSplit
+Do Until Sheet6.Cells(2, excelcol).text = mstrSplit
     excelcol = excelcol + 1
 Loop
-x = Sheet6.Cells(3, excelcol).Text
-If Sheet6.Cells(3, excelcol).Text <> isPrefix Then
+x = Sheet6.Cells(3, excelcol).text
+If Sheet6.Cells(3, excelcol).text <> isPrefix Then
     MsgBox ("You cannot mix Prefix and Suffix in 1 split")
     Exit Sub
 End If
@@ -70,7 +71,7 @@ Do Until Sheet6.Cells(2, excelcol) = MasterID
 Loop
  Sheet6.Cells(4, excelcol) = newDest
 sortmen.Splitsdisplay.Clear
-loadsplits (sortmen.SplitSelectGui.Text)
+loadsplits (sortmen.SplitSelectGui.text)
 End Sub
 
 Sub removeMstrSplit(MasterID As String)
@@ -91,8 +92,8 @@ End Sub
 
 Sub addMstrSplit(MasterID As String, Dest As String, isPrefix As Boolean)
 excelcol = 3
-Do Until Sheet6.Cells(2, excelcol).Text = ""
-    If Sheet6.Cells(2, excelcol).Text = MasterID Then
+Do Until Sheet6.Cells(2, excelcol).text = ""
+    If Sheet6.Cells(2, excelcol).text = MasterID Then
         MsgBox ("A split with this name already exists!" & vbNewLine & _
                 "If you want to modify an existing split just select it from the drop down list")
         Exit Sub
@@ -179,3 +180,7 @@ Do Until Sheet6.Cells(row, col) = ""
     row = row + 1
 Loop
 End Sub
+
+
+
+

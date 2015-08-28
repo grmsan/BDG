@@ -32,7 +32,7 @@ host.sendkey "45@e"
 host.waitready 1, 51
 
 famislogin:
-    host.writescreen famislogingui.EmpNum, 5, 39
+    host.writescreen famislogingui.empnum, 5, 39
     host.writescreen famislogingui.famispassword, 6, 39
     host.sendkey "@e"
     host.waitready 1, 51
@@ -90,7 +90,7 @@ Dim row As Integer
 row = 3
 
 Do While Sheet4.Cells(row, 1) <> ""
-    Call famiscancheck(Sheet4.Cells(row, 1).Text, row)
+    Call famiscancheck(Sheet4.Cells(row, 1).text, row)
     row = row + 1
 Loop
 
@@ -148,7 +148,7 @@ row = 3
 destcheckStart:
 bluerow = 9
 Do Until Sheet4.Cells(row, 1) = ""
-    host.writescreen Sheet4.Cells(row, 1).Text, bluerow, 2
+    host.writescreen Sheet4.Cells(row, 1).text, bluerow, 2
     If row > 8 Then
         host.sendkey "@e"
         host.waitready 1, 51
@@ -168,7 +168,7 @@ notAvail = False
 bluerow = 9
 Do Until bluerow >= 17
     host.readscreen mydata, 80, bluerow, 1
-    If InStr(1, mydata, Left(BORG.Location.Text, 3)) = 0 And Trim(mydata) <> "" Then
+    If InStr(1, mydata, Left(BORG.Location.text, 3)) = 0 And Trim(mydata) <> "" Then
         notAvail = True
         host.readscreen badcan, 11, bluerow, 2
         badcans = badcans & vbNewLine & badcan
@@ -180,3 +180,5 @@ If notAvail = True Then
     MsgBox ("Error with cans in Famis." & vbNewLine & "Current cans are not at location set in login section: " & badcans)
 End If
 End Sub
+
+

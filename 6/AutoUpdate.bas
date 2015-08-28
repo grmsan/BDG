@@ -1,6 +1,5 @@
 Attribute VB_Name = "AutoUpdate"
-Public Const strThisVer As String = "5.0"
-
+Public Const strThisVer As String = "6.02"
 
 Public Const strFileName As String = "BDG"
 
@@ -25,21 +24,21 @@ Call AutoUpdate.SETUP
 Dim myURL As String
 Dim modulenames As Collection
 Set modulenames = getModuleNames
-Dim tempStr As String
+Dim tempstr As String
 For Each Item In modulenames
-    tempStr = Item
-    myURL = modAddress(tempStr)
+    tempstr = Item
+    myURL = modAddress(tempstr)
     BDGdata = getBDGdata(myURL)
     If BDGdata = "Module Doesn't Exist" Then
         'skip it
     Else
-        BDGdata = "'" & BDGdata
-        Call remakeModule(tempStr, BDGdata)
+        'BDGdata = "'" & BDGdata
+        Call remakeModule(tempstr, BDGdata)
     End If
 Next
     
     'now to update the version number within this module itself....
-    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/BDGversion")
+    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion")
     Dim VBProj As VBIDE.VBProject
     Dim VBComp As VBIDE.VBComponent
     Dim CodeMod As VBIDE.CodeModule
@@ -77,17 +76,18 @@ Sub remakeModule(myModule As String, BDGdata As Variant)
     Exit Sub
 createModule:
 AddModuleToProject (myModule)
-myCMD = InputBox("Adding module " & myModule & " to BDG." & vbNewLine & "If message keeps appearing type stop to stop BDG")
-If myCMD = "stop" Then Exit Sub
+'myCMD = InputBox("Adding module " & myModule & " to BDG." & vbNewLine & "If message keeps appearing type stop to stop BDG")
+'If myCMD = "stop" Then Exit Sub
 Call remakeModule(myModule, BDGdata)
 End Sub
 
 Function modAddress(myModule As String) As String
-    modAddress = "https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/" & myModule & ".bas"
+    'https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion
+    modAddress = "https://raw.githubusercontent.com/grmsan/BDG/master/6/" & myModule & ".bas"
 End Function
 
 
-Function CreateModList()
+Sub CreateModList()
     Dim myFile As String
     Dim VBProj As VBIDE.VBProject
     Dim VBComp As VBIDE.VBComponent
@@ -95,12 +95,16 @@ Function CreateModList()
     Set VBProj = ActiveWorkbook.VBProject
     Dim col As Collection
     Set col = New Collection
+    col.Add "ThisWorkbook" 'want to capture opening workbook to be able to update workbook init.
     For Each Item In VBProj.VBComponents
-        col.Add Item.Name
+        If Item.Type = vbext_ct_StdModule Then
+            col.Add Item.Name
+        End If
     Next
     
     'myFile = Application.DefaultFilePath & "\Modules.txt"
-    myFile = "C:\Learning-Repo\BDG\Modules.txt"
+    myFile = Application.ActiveWorkbook.Path & "\Modules.txt"
+    'myFile = "C:\Learning-Repo\BDG\Modules.txt"
     Open myFile For Output As #1
     
     For Each Item In col
@@ -108,7 +112,7 @@ Function CreateModList()
     Next
     
     Close #1
-End Function
+End Sub
 
 Function currentversion() As Boolean
     Dim strThisVer As String
@@ -116,22 +120,22 @@ Function currentversion() As Boolean
     Dim nThisVer As Double
     Dim nCurVer As Double
     
-    On Error GoTo ErrOut
-    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/BDGversion")
+    On Error GoTo errout
+    strCurVer = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/BDGversion")
     
     nCurVer = Val(Trim(strCurVer))
     nThisVer = Val(AutoUpdate.strThisVer)
  
     If nCurVer <= nThisVer Then
         currentversion = True
-        MsgBox ("up to date!")
+        'MsgBox ("up to date!")
     Else
-        MsgBox ("not up to date")
+        'MsgBox ("not up to date")
         currentversion = False
     End If
     Exit Function
 
-ErrOut:
+errout:
     MsgBox ("Error occured while checking for newest version of BDG")
 
 End Function
@@ -162,7 +166,7 @@ End Function
 Function getModuleNames() As Collection
 Dim modstr As Collection
 Set modstr = New Collection
-modData = getBDGdata("https://raw.githubusercontent.com/grmsan/Learning-Repo/master/BDG/Modules.txt")
+modData = getBDGdata("https://raw.githubusercontent.com/grmsan/BDG/master/6/Modules.txt")
 mystr = Split(modData, """")
 For Each Item In mystr
     If Len(Item) > 1 Then
@@ -171,3 +175,19 @@ For Each Item In mystr
 Next
 Set getModuleNames = modstr
 End Function
+
+
+Sub quickModuleExport()
+     ' reference to extensibility library
+    Dim objMyProj As VBProject
+    Dim objVBComp As VBComponent
+     
+    Set objMyProj = Application.VBE.ActiveVBProject
+     
+    For Each objVBComp In objMyProj.VBComponents
+        If objVBComp.Type = vbext_ct_StdModule Then
+            mypath = Application.ActiveWorkbook.Path & "\" & objVBComp.Name & ".bas"
+            objVBComp.Export mypath
+        End If
+    Next
+End Sub
