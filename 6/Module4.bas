@@ -1,5 +1,3 @@
-Attribute VB_Name = "Module4"
-
 Sub EQfix()
 EQrow = 3
 Do Until Sheet1.Cells(EQrow, 1).Value < 1
