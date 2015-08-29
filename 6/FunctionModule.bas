@@ -1,5 +1,3 @@
-Attribute VB_Name = "FunctionModule"
-
 Function GrabAWBlines()
 Dim bluerow As Integer
 
