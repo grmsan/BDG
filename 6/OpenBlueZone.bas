@@ -1,5 +1,3 @@
-Attribute VB_Name = "OpenBlueZone"
-
 Dim excelrow As Integer
 Option Compare Text
 
