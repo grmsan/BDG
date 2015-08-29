@@ -1,4 +1,3 @@
-Attribute VB_Name = "testModule"
 Sub p()
 
 raw = "tool"
