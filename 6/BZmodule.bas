@@ -1,4 +1,3 @@
-Attribute VB_Name = "BZmodule"
 Dim host As Object
 Option Compare Text
 
