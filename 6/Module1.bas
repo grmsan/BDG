@@ -1,5 +1,3 @@
-Attribute VB_Name = "Module1"
-
 Sub getstarted()
 Sheets("CanManifest").Activate
 Module1.DEL
