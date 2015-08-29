@@ -1,5 +1,3 @@
-Attribute VB_Name = "FlexAssign"
-
 Dim cannum As Variant
 Dim canType As Variant
 Dim canSplit As Variant
