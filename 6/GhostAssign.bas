@@ -1,5 +1,3 @@
-Attribute VB_Name = "GhostAssign"
-
 Dim canarr() As Variant
 Dim splarr() As Variant
 Dim destarr() As Variant
