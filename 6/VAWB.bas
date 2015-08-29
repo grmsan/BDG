@@ -1,5 +1,3 @@
-Attribute VB_Name = "VAWB"
-
 Dim row As Integer
 Dim excelrow As Integer
 Option Compare Text
