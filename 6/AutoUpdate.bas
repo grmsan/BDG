@@ -1,4 +1,3 @@
-Attribute VB_Name = "AutoUpdate"
 Public Const strThisVer As String = "6.02"
 
 Public Const strFileName As String = "BDG"
