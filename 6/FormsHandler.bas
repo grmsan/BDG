@@ -1,5 +1,3 @@
-Attribute VB_Name = "FormsHandler"
-
 Sub borg_booGhostShow_Click(form As Object)
 With form
 If form.booGhostShow.Value = True Then
