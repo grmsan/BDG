@@ -15,8 +15,8 @@ host.Connect ("K")
 Set Wnd = host.Window()
 
 Wnd.Caption = "BDG Window"
-Wnd.Visible = True
 Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
+Wnd.Visible = BORG.Bluezone_Vis.Value
 host.waitready 1, 500
 Set openBlueZoneSession = host
 
@@ -86,9 +86,9 @@ If BZmodule.BZConnected() Then
 End If
 End Sub
 
-Function BZLogin(empnum As String, password As String) As Boolean
+Function BZLogin(EmpNum As String, password As String) As Boolean
 'Call BZsendKey("@C")
-Call BZsendKey("STSA@E", True)
+Call BZsendKey("ims@E", True)
 
 fedex = BZreadscreen(35, 1, 23)
 iter = 0
@@ -103,7 +103,7 @@ Do Until fedex = "F E D E R A L  E X P R E S S  I M S"
     End If
 Loop
 
-Call BZwritescreen(empnum, 7, 15)
+Call BZwritescreen(EmpNum, 7, 15)
 Call BZwritescreen(password, 7, 43)
 password = ""
 Call BZsendKey("@E", True)
@@ -133,6 +133,11 @@ Function DGscreenChooser(menu As String) As Boolean
 'On Error GoTo erroutScreenChoice
 DGscreenInfo = BZreadscreen(50, 1, 20)
 If InStr(1, DGscreenInfo, "DANGEROUS GOODS SYSTEM") >= 1 Then
+    dgscreeninfo2 = BZreadscreen(50, 2, 20)
+    If InStr(1, dgscreeninfo2, "SCAN RECONCILIATION SCREEN") > 1 Then
+        Call BZsendKey("@3")
+    End If
+    
     Call BZwritescreen(menu, 2, 17)
     Call BZsendKey("@E")
 Else
@@ -140,7 +145,7 @@ Else
     Call BZsendKey("asap@e", True) 'types ASAP and enters command
     miscdata = BZreadscreen(32, 1, 2)
     If miscdata = "ASAP COMMAND IS UNKNOWN TO VTAM." Or miscdata = "APPLICATION NOT ACTIVE.         " Then
-        res = BZLogin(BORG.empnum, BORG.PasswordBox)
+        res = BZLogin(BORG.EmpNum, BORG.PasswordBox)
         If res = False Then
             DGscreenChooser = False
             Exit Function
@@ -192,7 +197,6 @@ Set host = openBlueZoneSession
 With host
     .waitready 1, 51
     .CloseSession 0, 11
-    BORG.loginStatusOff.Visible = True
 End With
 BORG.labelUpdater.Caption = "Closing Previous Sesson..."
 Application.wait Now + TimeValue("00:00:01")
