@@ -1,3 +1,4 @@
+
 Dim cannum As Variant
 Dim canType As Variant
 Dim canSplit As Variant
@@ -120,10 +121,10 @@ Do Until Sheet6.Cells(ERow, ecol) = ""
 ErrorChecker
 
     bluerow = 10
-    miscdata = BZreadscreen(13, bluerow, 5)
+    miscdata = BZreadscreen(8, bluerow, 18)
     Do Until Trim(miscdata) = ""
 CheckingPage:
-    miscdata = BZreadscreen(13, bluerow, 5)
+    miscdata = BZreadscreen(8, bluerow, 18)
         If Right(miscdata, 2) <> "RT" Then
             If Trim(miscdata) <> "" Then
                 Call BZwritescreen("A", bluerow, 2)
@@ -156,7 +157,7 @@ Sub PrefixAssign(i As Integer, hazFilter As String)
     Dim bluerow As Integer
     Dim tempstr As String
     ecol = 3
-    
+    ignored = 0
     Do Until Sheet6.Cells(2, ecol) = canSplit(i)
         If Sheet6.Cells(2, ecol).Value = "" Then
             MsgBox ("could not find split " & canSplit(i) & "for can " & cannum(i))
@@ -164,21 +165,19 @@ Sub PrefixAssign(i As Integer, hazFilter As String)
         End If
         ecol = ecol + 1
     Loop
-    
     ERow = 5
     Do Until Sheet6.Cells(ERow, ecol) = ""
         Call BZwritescreen("  ", 5, 28)
         Call BZwritescreen(Sheet6.Cells(ERow, ecol).text, 5, 28)
         Call BZwritescreen(hazFilter, 6, 45)
         Call BZsendKey("@e")
-
 ErrorChecker
-
         bluerow = 10
-        miscdata = BZreadscreen(13, bluerow, 5)
+        miscdata = BZreadscreen(8, bluerow, 18)
         Do Until Trim(miscdata) = ""
 CheckingPagePrefix:
-        miscdata = BZreadscreen(13, bluerow, 5)
+        
+        miscdata = BZreadscreen(8, bluerow, 18)
             If Right(miscdata, 2) <> "RT" Then
                 If isUrsaLocal(Trim(Right(miscdata, 5))) <> True Then
                     If Trim(miscdata) <> "" Then
@@ -192,7 +191,19 @@ CheckingPagePrefix:
                         tempstr = canDest(i)
                         Call BZwritescreen(tempstr, 7, 53)
                         Call BZsendKey("@e")
+                        ignored = 0
                         Call FlexAssign.ErrorChecker
+                        If cannum(i) = "BULK*" Then
+                            cannum(i) = BZreadscreen(9, 7, 24)
+                            datarow = 3
+                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
+                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
+                                Sheet4.Cells(datarow, 3) = canDest(i) And _
+                                Sheet4.Cells(datarow, 4) = canType(i)
+                                datarow = datarow + 1
+                            Loop
+                        Sheet4.Cells(datarow, 1) = cannum(i)
+                        End If
                         bluerow = 10
                         GoTo CheckingPagePrefix
                     Else
@@ -203,15 +214,33 @@ CheckingPagePrefix:
                         tempstr = canDest(i)
                         Call BZwritescreen(tempstr, 7, 53)
                         Call BZsendKey("@e")
+                        ignored = 0
                         Call FlexAssign.ErrorChecker
+                        If cannum(i) = "BULK*" Then
+                            cannum(i) = BZreadscreen(9, 7, 24)
+                            datarow = 3
+                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
+                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
+                                Sheet4.Cells(datarow, 3) = canDest(i) And _
+                                Sheet4.Cells(datarow, 4) = canType(i)
+                                datarow = datarow + 1
+                            Loop
+                            Sheet4.Cells(datarow, 1) = cannum(i)
+                        End If
                     End If
+                Else
+                    ignored = ignored + 1
                 End If
+            Else
+                ignored = ignored + 1
+            End If
+            If ignored = 9 Then
+                Call BZsendKey("@8")
             End If
             bluerow = bluerow + 1
         Loop
         ERow = ERow + 1
     Loop
-
 End Sub
 
 Sub isAnythingLeft()
@@ -261,15 +290,23 @@ Loop
 End Sub
 
 Function ErrorChecker()
-errorMisc = BZreadscreen(3, 24, 2)
-If errorMisc = "091" Then
+errormisc = BZreadscreen(3, 24, 2)
+If errormisc = "091" Then
     Call BZsendKey("@4")
-End If
-If errorMisc = "INV" Then 'invalid container error
+ElseIf errormisc = "095" Then 'bulk doesn't exist
+    oldbulk = BZreadscreen(9, 7, 24)
+    Call BZwritescreen("bulk*", 7, 24)
+    Call BZsendKey("@E")
+    cannum(i) = BZreadscreen(9, 7, 24)
+    datarow = 3
+    Do Until Sheet4.Cells(datarow, 1) = oldbulk And _
+        Sheet4.Cells(datarow, 2) = canSplit(i) And _
+        Sheet4.Cells(datarow, 3) = canDest(i) And _
+        Sheet4.Cells(datarow, 4) = canType(i)
+        datarow = datarow + 1
+    Loop
+    Sheet4.Cells(datarow, 1) = cannum(i)
+ElseIf errormisc = "INV" Then 'invalid container error
     MsgBox ("invalid container")
 End If
 End Function
-
-
-
-
