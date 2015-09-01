@@ -1,3 +1,16 @@
+Sub borg_empnum_change(form As Object)
+If BORG.EmpNum.text <> "832174" Then
+    BORG.vis_btn.Visible = False
+    BORG.invis_btn.Visible = False
+Else
+    BORG.vis_btn.Visible = True
+    BORG.invis_btn.Visible = True
+End If
+
+
+End Sub
+
+
 Sub borg_booGhostShow_Click(form As Object)
 With form
 If form.booGhostShow.Value = True Then
@@ -97,7 +110,7 @@ GrabCloseScreen
 End Sub
 
 Sub borg_btn_cancheck_Click(form As Object)
-famislogingui.empnum = BORG.empnum
+famislogingui.EmpNum = BORG.EmpNum
 
 famis.famislogin
 famis.famisDestCheck
@@ -119,7 +132,7 @@ Call form.clscrn_refresh_Click
 End Sub
 
 Sub borg_btn_login_Click(form As Object)
-If form.empnum.text = "" Or form.PasswordBox = "" Then
+If form.EmpNum.text = "" Or form.PasswordBox = "" Then
     MsgBox ("Please enter your FedEx ID and IMS password")
     Exit Sub
 End If
@@ -142,7 +155,7 @@ Do While Sheet4.Cells(datarow, 1) <> ""
     'Call GhostAssign.GrabAssigned(3, Sheet4.Cells(datarow, 1).text)
     Dim excelrow As Integer
     excelrow = GhostAssign.GrabAssign(Sheet4.Cells(datarow, 1).text)
-    
+    Call Assign023(form.CanSelectGUI.text)
     Call DGscreenChooser("viewawb")
 
     'setup format and variables for VAWB section
@@ -156,13 +169,7 @@ Do While Sheet4.Cells(datarow, 1) <> ""
     Call Module4.APOPfix
     
     BORG.labelUpdater.Caption = "Sorting your data..."
-    If BORG.Can_flight.Value = True Then
-        Call Module4.HAZ_LIST_w_flightInfo
-    ElseIf BORG.StationSort = True Then
-        Call Module4.HAZ_LIST_w_Station
-    Else
-        Call Module4.SORT_MACRO
-    End If
+    Call Module4.SORT_MACRO
     
     BORG.labelUpdater.Caption = "Counting Gas"
     Call Module4.gasCount
@@ -182,6 +189,7 @@ End Sub
 Sub borg_btn_ManifestOne_Click(form As Object)
 Call GhostAssign.filterClear
 Call Module1.DEL
+Module1.DELmanifestSheet
 
 If BORG.CanSelectGUI.Value = "" Then
     BORG.labelUpdater.Caption = "PLEASE SELECT A CAN TO MANIFEST FROM THE CLOSED SCREEN CAN CHOOSER"
@@ -192,7 +200,7 @@ Call Module1.SETUP
 'Call GhostAssign.GrabAssigned(3, form.CanSelectGUI.text)
 Dim excelrow As Integer
 excelrow = GhostAssign.GrabAssign(form.CanSelectGUI.text)
-
+Call Assign023(form.CanSelectGUI.text)
 Call DGscreenChooser("viewawb")
 
 'setup format and variables for VAWB section
@@ -206,14 +214,7 @@ BORG.labelUpdater.Caption = "Running Fixes"
 Call Module4.APOPfix
 
 BORG.labelUpdater.Caption = "Sorting your data..."
-
-If BORG.Can_flight.Value = True Then
-    Call Module4.HAZ_LIST_w_flightInfo
-ElseIf BORG.StationSort = True Then
-    Call Module4.HAZ_LIST_w_Station
-Else
-    Call Module4.SORT_MACRO
-End If
+Call Module4.SORT_MACRO
 
 BORG.labelUpdater.Caption = "Counting Gas"
 Call Module4.gasCount
@@ -221,8 +222,11 @@ Call Module4.gasCount
 BORG.labelUpdater.Caption = "Counting Pieces"
 Call Module4.pieceCount
 
-BORG.labelUpdater.Caption = "Printing your data..."
-If BORG.PrintQ = True Then Call Module1.printFun
+If BORG.PrintQ = True Then
+    BORG.labelUpdater.Caption = "Printing your data..."
+    Call Module1.printFun
+End If
+
 
 Call DGscreenChooser("close")
 
@@ -232,12 +236,10 @@ Sub borg_btn_OpenCan_Click(form As Object)
 
 If BORG.CanSelectGUI.Value = "" Then
     MsgBox ("Please select a value from the list")
-    BORG.CanSelectGUI.Clear
     GrabCloseScreen
 End If
 
 openclosedcan (BORG.CanSelectGUI.Value)
-BORG.CanSelectGUI.Clear
 GrabCloseScreen
 
 End Sub
@@ -257,12 +259,14 @@ Sub borg_btn_UnAssign_Click(form As Object)
 
 If BORG.CanSelectGUI.Value = "" Then
     MsgBox ("Please select a value from the list")
-    BORG.CanSelectGUI.Clear
+    BORG.CanSelectGUI.Value = ""
     GrabCloseScreen
+    Exit Sub
 End If
 
 Call UnassignCan(BORG.CanSelectGUI.Value)
-BORG.CanSelectGUI.Clear
+BORG.labelUpdater.Caption = "Succesfully Unassigned freight from " & BORG.CanSelectGUI.text & "."
+BORG.CanSelectGUI.Value = ""
 Call GrabCloseScreen
 
 End Sub
@@ -284,7 +288,11 @@ can = BORG.CanSelectGUI
 
 Call GhostAssign.filterClear
 BORG.labelUpdater.Caption = "Dumping " & can & " into AWB data."
-Call GhostAssign.GrabAssigned(eRows, can)
+'Call GhostAssign.GrabAssigned(eRows, can)
+Call GhostAssign.GrabAssign(form.CanSelectGUI.text, "A", GetMaxRow)
+Call GhostAssign.GrabAssign(form.CanSelectGUI.text, "I", GetMaxRow)
+Call dupFind
+Call DGscreenChooser("Close")
 Call OpenBlueZone.UnassignCan(BORG.CanSelectGUI.text)
 Call FormsHandler.borg_clscrn_refresh_Click(form)
 BORG.labelUpdater.Caption = can & " has been dumped into AWB data and is ready to be ghost assigned."
@@ -363,21 +371,18 @@ If form.StationSort.Value = True And form.Can_flight.Value = True Then
     form.Can_flight.Value = False
 End If
 End Sub
-
 Sub borg_CanSelectGUI_Change(form As Object)
 
 End Sub
 
 Sub borg_clscrn_refresh_Click(form As Object)
-If form.loginStatusOff.Visible = True Then
-    form.labelUpdater.Caption = "PLEASE LOGIN TO BLUEZONE"
-    form.tgl_btnLogin.Value = True
-    Exit Sub
-End If
 
 'BORG.CanSelectGUI.Clear
 Call DGscreenChooser("close")
+form.CanSelectGUI.Value = ""
+Call deletecans
 Call GrabCloseScreen
+
 End Sub
 
 Sub borg_combo_splitName_Change(form As Object)
