@@ -1,3 +1,4 @@
+
 Dim excelcol As Integer
 Dim excelrow As Integer
 
@@ -178,7 +179,3 @@ Do Until Sheet6.Cells(row, col) = ""
     row = row + 1
 Loop
 End Sub
-
-
-
-
