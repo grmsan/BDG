@@ -1,3 +1,4 @@
+
 Sub getstarted()
 Sheets("CanManifest").Activate
 Module1.DEL
@@ -18,6 +19,10 @@ Sub DEL()
     Sheet2.Rows("6:9999").Clear
     Sheet3.Rows("16:9999").Clear
     Sheet2.Cells(4, 1) = ""
+    'Selection.Delete Shift:=xlUp
+    'Sheet2.Cells(1, 1).Select
+End Sub
+Sub deletecans()
     myrow = 3
     Do Until Sheet3.Cells(myrow, 12) = ""
         Sheet3.Cells(myrow, 12).Clear
@@ -25,10 +30,7 @@ Sub DEL()
         Sheet3.Cells(myrow, 14).Clear
         myrow = myrow + 1
     Loop
-    'Selection.Delete Shift:=xlUp
-    'Sheet2.Cells(1, 1).Select
 End Sub
-
 Sub OpenBDG()
 
 Load BORG
