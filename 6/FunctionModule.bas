@@ -1,3 +1,4 @@
+
 Function GrabAWBlines()
 Dim bluerow As Integer
 
@@ -168,7 +169,7 @@ Function Classfind(raw As String)
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 If InStr(1, raw, "RADIOACTIVE MATERIAL, EXCEPTED PACKAGE") > 1 Then Exit Function
 classposition = 0
-hazclass = ""
+HazClass = ""
 
 Subend = 1
 
@@ -193,17 +194,17 @@ Do Until classposition > 1 Or x > 37
             Else
                 Classes = Array("1.4B", "1.4C", "1.4D", "1.4E", "1.4G", "1.4S", "2.1", "2.2", "3", _
                     "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2", "7", "8", "9")
-                hazclass = Classes(x)
+                HazClass = Classes(x)
                 Exit Do
             End If
-        hazclass = Mid(raw, classposition + 1, classposition - (classposition - Subend))
+        HazClass = Mid(raw, classposition + 1, classposition - (classposition - Subend))
     End If
 x = x + 1
 Loop
 
 'UGLY code
 Sheet3.Cells(16, 6).Value = classposition - 1
-Sheet3.Cells(16, 5).Value = hazclass
+Sheet3.Cells(16, 5).Value = HazClass
 
 End Function
 
@@ -422,7 +423,7 @@ Loop
 End Function
 
 Function RetrieveOptions()
-BORG.empnum = Sheet4.Cells(2, 8)
+BORG.EmpNum = Sheet4.Cells(2, 8)
 BORG.PW_remember = Sheet4.Cells(4, 8)
 
 If BORG.PW_remember = True Then
@@ -435,14 +436,14 @@ BORG.Location = Sheet4.Cells(5, 8)
 BORG.printerID = Sheet4.Cells(6, 8)
 BORG.StationSort = Sheet4.Cells(7, 8)
 BORG.Can_flight = Sheet4.Cells(8, 8)
-BORG.phx_Food = Sheet4.Cells(9, 8)
+BORG.Bluezone_Vis = Sheet4.Cells(9, 8)
 BORG.PrintQ = Sheet4.Cells(10, 8)
 BORG.booMoreControls = Sheet4.Cells(11, 8)
 BORG.booGhostShow = Sheet4.Cells(12, 8)
 End Function
 
 Function SaveOptions()
-Sheet4.Cells(2, 8) = BORG.empnum
+Sheet4.Cells(2, 8) = BORG.EmpNum
 Sheet4.Cells(4, 8) = BORG.PW_remember
 
 If BORG.PW_remember = True Then
@@ -455,7 +456,7 @@ Sheet4.Cells(5, 8) = BORG.Location
 Sheet4.Cells(6, 8) = BORG.printerID
 Sheet4.Cells(7, 8) = BORG.StationSort
 Sheet4.Cells(8, 8) = BORG.Can_flight
-Sheet4.Cells(9, 8) = BORG.phx_Food
+Sheet4.Cells(9, 8) = BORG.Bluezone_Vis
 Sheet4.Cells(10, 8) = BORG.PrintQ
 Sheet4.Cells(11, 8) = BORG.booMoreControls
 Sheet4.Cells(12, 8) = BORG.booGhostShow
@@ -469,7 +470,3 @@ row = row + 1
 Loop
 
 End Function
-
-
-
-
