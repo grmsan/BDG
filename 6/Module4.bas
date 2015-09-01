@@ -1,3 +1,4 @@
+
 Sub EQfix()
 EQrow = 3
 Do Until Sheet1.Cells(EQrow, 1).Value < 1
@@ -28,9 +29,10 @@ End Sub
 Sub SORT_MACRO()
 Sheet1.Columns("A:A").NumberFormat = "000000000000"
 Sheet1.Columns("C:C").NumberFormat = "0000"
-        ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
-    ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("L3:L9999") _
-        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
+    
+'ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("L3:L9999") _
+    , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
         
 If BORG.StationSort = True Then
     ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("B3:B9999") _
@@ -44,6 +46,8 @@ End If
 
     ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("C3:C9999") _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    'ActiveWorkbook.Worksheets("Sheet1").AutoFilter.Sort.SortFields.Add Key:=Range _
+        ("C2"), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortTextAsNumbers
     ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("N3:N9999") _
         , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
     ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Add Key:=Range("P3:P9999") _
@@ -58,13 +62,13 @@ End If
     End With
     
 
-'If BORG.StationSort = True Then
-'    Call Module4.HAZ_LIST_w_Station
-'ElseIf BORG.Can_flight = True Then
-'    Call Module4.HAZ_LIST_w_flightInfo
-'Else
+If BORG.StationSort = True Then
+    Call Module4.HAZ_LIST_w_Station
+ElseIf BORG.Can_flight = True Then
+    Call Module4.HAZ_LIST_w_flightInfo
+Else
     Call Module4.HAZ_LIST
-'End If
+End If
 
 End Sub
 
@@ -188,7 +192,7 @@ oldURSA = ""
 Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
 Do Until Sheet1.Cells(y, 1) = ""
 y = y + 1
-'roadrunner
+
 Loop
 Dim URSA As String
 stars = " ***************** "
@@ -266,7 +270,7 @@ Loop
 
 Dim URSA As String
 Dim str As String
-str = "DG coming from can "
+str = "DG coming from "
 str2 = " on "
 stars = "  *****************  "
 
@@ -376,11 +380,12 @@ End If
 row = row + 1
 Loop
 If Gas > 0 Then
-    Sheet2.Cells(4, 1).Value = "    (Total 2.2 in can = " & Gas & " KG)    "
+    Sheet2.Cells(4, 1).Value = "    (Total 2.2  = " & Gas & " KG)    "
 End If
 End Sub
 
 Sub pieceCount()
+
 TotalPieces = 0
 row = 6
 
@@ -395,7 +400,7 @@ End If
 row = row + 1
 Loop
 If TotalPieces >= 1 Then
-    Sheet2.Cells(4, 1).Value = Sheet2.Cells(4, 1) & "   (Total Pieces in Can = " & TotalPieces & ")    "
+    Sheet2.Cells(4, 1).Value = Sheet2.Cells(4, 1) & "   (Total Pieces = " & TotalPieces & ")    "
 End If
 End Sub
 
@@ -408,7 +413,3 @@ BORG.labelUpdater.Caption = "Counting Pieces"
 Call Module4.pieceCount
 
 End Sub
-
-
-
-
