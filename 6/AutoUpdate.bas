@@ -1,4 +1,4 @@
-Public Const strThisVer As String = "6.02"
+Public Const strThisVer As String = "6.002"
 
 Public Const strFileName As String = "BDG"
 
@@ -190,3 +190,4 @@ Sub quickModuleExport()
         End If
     Next
 End Sub
+
