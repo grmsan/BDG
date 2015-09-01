@@ -1,3 +1,4 @@
+
 Dim row As Integer
 Dim excelrow As Integer
 Option Compare Text
@@ -238,7 +239,7 @@ PCS = 0.0001
 TwoRow = TwoRow - 16
 
 If TwoRow <> 1 Then
-    Do Until TwoRow = 1
+    Do Until TwoRow <= 1
         Sheet1.Rows(excelrow).Offset(1).EntireRow.Insert
         Sheet1.Cells(excelrow + 1, 14).Value = Sheet1.Cells(excelrow, 14).Value + PCS
         Sheet1.Cells(excelrow + 1, 15).Value = Sheet1.Cells(excelrow, 15).Value + PCS
@@ -309,41 +310,51 @@ Function CanFlightBulk()
 'On Error GoTo errout
 Dim r As Integer
 Dim c As Integer
-r = 13
-c = 8
+
 loc_check = ""
-next_check = ""
+col_check = BZreadscreen(10, 13, 42)
+If Trim(col_check) = "" Then
+    c = 8
+Else
+    c = 48
+End If
 
 BORG.Location.text = UCase(BORG.Location.text)
-Do Until r = 22
+orgchk = BZreadscreen(Len(BORG.Location), 4, 24)
+looper:
+r = 22
+Do Until r = 12
     loc_check = Trim(BZreadscreen(5, r, c))
-    next_check = Trim(BZreadscreen(5, r + 1, c))
-    orgchk = BZreadscreen(Len(BORG.Location), 4, 24)
     If orgchk = BORG.Location Then
         retCan = BORG.Location
         retFlight = BORG.Location
         CanFlightBulk = Array(retCan, retFlight)
         Exit Function
     End If
-    If loc_check = BORG.Location.text And next_check = "" Then
-        can = BZreadscreen(10, r, 14)
-        flightTruck = BZreadscreen(5, r, 35)
-        retCan = can
-        retFlight = flightTruck
+    If loc_check = BORG.Location.text Then
+        can = BZreadscreen(10, r, c + 6)
+        flighttruck = BZreadscreen(5, r, c + 27)
+        If Trim(flighttruck) = "" Then
+            flighttruck = Trim(BZreadscreen(5, r, c - 6))
+        End If
+        retCan = Trim(can)
+        retFlight = flighttruck
         CanFlightBulk = Array(retCan, retFlight)
         Exit Function
     End If
-    r = r + 1
-    If r = 22 Then
-        retCan = "Unknown"
-        retFlight = "Unknown"
-        CanFlightBulk = Array(retCan, retFlight)
-        Exit Function
+    r = r - 1
+    If r = 12 Then
+        If c = 8 Then
+            retCan = "Unknown"
+            retFlight = "Unknown"
+            CanFlightBulk = Array(retCan, retFlight)
+            Exit Function
+        Else
+            c = 8
+            GoTo looper
+        End If
     End If
-
 Loop
-
-
 Exit Function
 
 errout:
@@ -584,20 +595,20 @@ Start = 1
     RADchk = InStr(1, raw, "EXCEPTED PACKAGE")
     If RADchk >= 1 Then
         classinfo = Array("0", RADchk)
-        hazclass = classinfo(0)
+        HazClass = classinfo(0)
         GoTo hazclassAssign
     End If
     
     classinfo = Classfind(raw)
-    hazclass = classinfo(0)
+    HazClass = classinfo(0)
     
     VAWB_Class = classinfo(1)
      
 hazclassAssign:
     If special = 1 Then
-        Sheet1.Cells(excelrow + (row - 17), 7).Value = hazclass
+        Sheet1.Cells(excelrow + (row - 17), 7).Value = HazClass
     Else:
-        Sheet1.Cells(excelrow, 7).Value = hazclass
+        Sheet1.Cells(excelrow, 7).Value = HazClass
     End If
     VAWB_Class = classinfo(1)
 End Function
@@ -623,21 +634,21 @@ For Each class In Subclass
                 If endcheck = ")" Then Exit Do
                 Subend = Subend + 1
             Loop
-            hazclass = Mid(raw, classposition + 1, classposition - (classposition - Subend))
+            HazClass = Mid(raw, classposition + 1, classposition - (classposition - Subend))
         Else
-            hazclass = class
+            HazClass = class
         End If
         Exit For
     End If
 Next
 
-If InStr(1, hazclass, "(") >= 1 Then
+If InStr(1, HazClass, "(") >= 1 Then
     'MsgBox (hazclass)
 Else
-    hazclass = Trim(Replace(hazclass, ",", ""))
+    HazClass = Trim(Replace(HazClass, ",", ""))
 End If
 
-Classfind = Array(hazclass, classposition)
+Classfind = Array(HazClass, classposition)
 Exit Function
 errout:
     Classfind = Array("0", 0)
