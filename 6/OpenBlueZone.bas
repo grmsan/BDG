@@ -1,3 +1,4 @@
+
 Dim excelrow As Integer
 Option Compare Text
 
@@ -10,7 +11,7 @@ Call GrabCloseScreen
 
 BORG.labelUpdater.Caption = "BDG is now connected to Bluezone Session."
 BORG.tgl_btnLogin.Value = False
-BORG.loginStatusOff.Visible = False
+
 End Sub
 
 Function GrabReconcile(excelrow As Integer) As Integer
@@ -45,9 +46,9 @@ Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
         URSA = Mid(fullinfo, 17, 8)
         Sheet1.Cells(excelrow, 6).Value = Trim(URSA)
         
-        hazclass = Mid(fullinfo, 45, 4)
-        If hazclass = "****" Then hazclass = "Ovrpk"
-        Sheet1.Cells(excelrow, 7).Value = Trim(hazclass)
+        HazClass = Mid(fullinfo, 45, 4)
+        If HazClass = "****" Then HazClass = "Ovrpk"
+        Sheet1.Cells(excelrow, 7).Value = Trim(HazClass)
         
         PackingGroup = Mid(fullinfo, 50, 3)
         If PackingGroup = "***" Then PackingGroup = "Ovrk"
@@ -58,12 +59,12 @@ Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
         Sheet1.Cells(excelrow, 9).Value = 1
         'reconcile has no weight
         
-        APiO = Mid(fullinfo, 34, 6)
-        If APiO = "ALPKN1" Then
+        APio = Mid(fullinfo, 34, 6)
+        If APio = "ALPKN1" Then
             APnum = Mid(fullinfo, 41, 3)
             Sheet1.Cells(excelrow, 14).Value = Trim(APnum)
             Sheet1.Cells(excelrow, 15).Value = 1
-        ElseIf APiO = "OVRPCK" Then
+        ElseIf APio = "OVRPCK" Then
             OPnum = Mid(fullinfo, 41, 3)
             Sheet1.Cells(excelrow, 16).Value = Trim(OPnum)
             Sheet1.Cells(excelrow, 17).Value = 1
@@ -121,7 +122,7 @@ Loop
 End Sub
 
 Function GrabCloseScreen()
-BORG.CanSelectGUI.Visible = False
+BORG.CanSelectGUI.Locked = True
 cannum = ""
 STA = ""
 Status = ""
@@ -178,10 +179,12 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
 '    host.waitready 1, 51
 '    GoTo addingCans
 'End If
+If x = 1 Then x = 2
 rowsrcSTR = "VARIABLES!L3:N" & Trim(str(x + 1)) 'N15""
 BORG.CanSelectGUI.RowSource = rowsrcSTR
 End If
-BORG.CanSelectGUI.Visible = True
+BORG.CanSelectGUI.Locked = False
+
 End Function
 Function closedcancheck()
 col = Array(3, 30, 57)
@@ -249,6 +252,7 @@ Function UnassignCan(can As Variant)
 Dim tempcol As Integer
 Dim row As Integer
 
+can = Trim(can)
 cannum = ""
 STA = ""
 Status = ""
@@ -264,7 +268,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
         STA = BZreadscreen(5, row, tempcol + 11)
         Status = BZreadscreen(1, row, tempcol + 18)
         If Trim(cannum) = can Then
-            If Status = "O" Then
+            If Status = "O" Or Status = "R" Then
                 tempcol = col(i)
                 Call BZwritescreen("U", row, tempcol - 3)
                 Call BZsendKey("@E")
@@ -288,7 +292,6 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
     Loop
 End If
 
-BORG.labelUpdater.Caption = "Succesfully Unassigned freight from " & can & "."
 
 End Function
 
@@ -354,7 +357,7 @@ End If
 Call BZsendKey("@3")
 End Function
 
-Function ReconcileCan(can As String, Optional host As Variant)
+Function ReconcileCan(can As String)
 Dim colint As Integer
 Dim row As Integer
 
@@ -445,7 +448,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" And userinput = 0 Then
     Status = BZreadscreen(1, row, colint + 18)
     
     If Trim(cannum) = can Then
-        If Status = "O" Then
+        If Status = "O" Or Status = "R" Then
             Call DGscreenChooser("ICE")
             Call BZwritescreen(cannum, 7, 24)
             Call BZwritescreen(STA, 7, 50)
@@ -536,8 +539,3 @@ MsgBox ("Your local sort list has been generated." & vbNewLine & _
         & vbNewLine & vbNewLine & _
         "BDG generates the list form the ViewURSA screen in AutoDG. However the ViewURSA has some incorrect data and it's important to view the list yourself.")
 End Sub
-
-
-
-
-
