@@ -1,4 +1,6 @@
 Dim host As Object
+Public bz_connected As Boolean
+
 Option Compare Text
 
 Function BZinit()
@@ -18,7 +20,10 @@ Wnd.Caption = "BDG Window"
 Wnd.State = 0 ' 0 restore, 1 minimize, 2 maximize
 Wnd.Visible = BORG.Bluezone_Vis.Value
 host.waitready 1, 500
+
+bz_connected = True
 Set openBlueZoneSession = host
+
 
 End Function
 
@@ -71,11 +76,12 @@ erroutwrite:
 End Function
 
 Function BZsendKey(text As String, Optional wait As Boolean = True)
-'On Error GoTo erroutSend
+On Error GoTo erroutSend
 host.sendkey text
 If wait = True Then host.waitready 1, 51
 Exit Function
 erroutSend:
+MsgBox (Err.Number)
 End Function
 
 Sub BZgotoAUTOdg()
@@ -202,4 +208,6 @@ BORG.labelUpdater.Caption = "Closing Previous Sesson..."
 Application.wait Now + TimeValue("00:00:01")
 
 End Sub
+
+
 
