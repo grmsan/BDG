@@ -1,5 +1,5 @@
 Sub borg_empnum_change(form As Object)
-If BORG.EmpNum.text <> "832174" Then
+If BORG.EmpNum.text <> "admin832174" Then
     BORG.vis_btn.Visible = False
     BORG.invis_btn.Visible = False
 Else
@@ -87,29 +87,49 @@ form.txt_canNum.SetFocus
 End Sub
 
 Sub borg_btn_AddIce_Click(form As Object)
-
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 If BORG.CanSelectGUI.Value = "" Then
     AddIce ("none")
 Else
     AddIce (BORG.CanSelectGUI.Value)
 End If
-
 form.clscrn_refresh_Click
-
 
 End Sub
 
 Sub borg_btn_assignCan_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 Call FlexAssign.FlexAssignDirectory(form.txt_canNum.text)
 GrabCloseScreen
 End Sub
 
 Sub borg_BTN_AutoAssign_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+If Sheet4.Cells(3, 1) = "" Then
+    BORG.labelUpdater.Caption = "ERROR: Please add cans to the can menu on top."
+    Exit Sub
+End If
 Call FlexAssign.FlexAssignDirectory
 GrabCloseScreen
+
 End Sub
 
 Sub borg_btn_cancheck_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 famislogingui.EmpNum = BORG.EmpNum
 
 famis.famislogin
@@ -127,6 +147,10 @@ Sheet4.Range("A3:E999").Delete xlUp
 End Sub
 
 Sub borg_btn_CloseCan_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 CloseCan (form.CanSelectGUI.Value)
 Call form.clscrn_refresh_Click
 End Sub
@@ -140,6 +164,10 @@ Call OpenBlueZone.BZOpenSession
 End Sub
 
 Sub borg_btn_ManifestAll_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 If Sheet4.Cells(3, 1) = "" Then
     form.labelUpdater.Caption = "ERROR: No cans set up in BestDG. Set up your cans in the can menu above to print multiple manifests."
     Exit Sub
@@ -187,6 +215,10 @@ Loop
 End Sub
 
 Sub borg_btn_ManifestOne_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 Call GhostAssign.filterClear
 Call Module1.DEL
 Module1.DELmanifestSheet
@@ -234,6 +266,11 @@ End Sub
 
 Sub borg_btn_OpenCan_Click(form As Object)
 
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 If BORG.CanSelectGUI.Value = "" Then
     MsgBox ("Please select a value from the list")
     GrabCloseScreen
@@ -256,9 +293,12 @@ Next
 End Sub
 
 Sub borg_btn_UnAssign_Click(form As Object)
-
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 If BORG.CanSelectGUI.Value = "" Then
-    MsgBox ("Please select a value from the list")
+    BORG.labelUpdater.Caption = "ERROR: Please select a value from the list."
     BORG.CanSelectGUI.Value = ""
     GrabCloseScreen
     Exit Sub
@@ -281,6 +321,11 @@ End Sub
 
 
 Sub borg_btnDump_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 Dim eRows As Integer
 eRows = GetMaxRow
 Dim can As String
@@ -308,6 +353,11 @@ End If
 End Sub
 
 Sub borg_btnGrabUnassigned_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 BORG.labelUpdater.Caption = "Clearing up old data..."
 
 Call GhostAssign.filterClear
@@ -376,11 +426,16 @@ Sub borg_CanSelectGUI_Change(form As Object)
 End Sub
 
 Sub borg_clscrn_refresh_Click(form As Object)
+Call deletecans
+form.CanSelectGUI.Value = ""
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
 
 'BORG.CanSelectGUI.Clear
 Call DGscreenChooser("close")
-form.CanSelectGUI.Value = ""
-Call deletecans
+
 Call GrabCloseScreen
 
 End Sub
@@ -397,6 +452,11 @@ form.txt_Dest = UCase(Sheet6.Cells(4, col))
 End Sub
 
 Sub borg_CommandButton9_Click(form As Object)
+If BZmodule.bz_connected = False Then
+    BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
+    Exit Sub
+End If
+
 'clear up filter
 Call GhostAssign.filterClear
 'clear up old predit assign stuff
@@ -508,4 +568,5 @@ End Sub
 Sub borg_userform_queryClose(form As Object)
 Call FormsHandler.borg_btnClose_Click(form)
 End Sub
+
 
