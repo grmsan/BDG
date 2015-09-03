@@ -34,7 +34,7 @@ If form.booMoreControls.Value = False Then
     form.frame_closeScrn.Height = 60
     form.CanSelectGUI.Top = 6
     form.clscrn_refresh.Top = 6
-    form.btn_ManifestAll.Top = 30
+    'form.btn_ManifestAll.Top = 30
     form.btn_ManifestOne.Top = 30
     form.btn_AddIce.Top = 30
 ElseIf form.booMoreControls.Value = True Then
@@ -44,7 +44,7 @@ ElseIf form.booMoreControls.Value = True Then
     form.frame_closeScrn.Height = 84
     form.CanSelectGUI.Top = 30
     form.clscrn_refresh.Top = 30
-    form.btn_ManifestAll.Top = 54
+    'form.btn_ManifestAll.Top = 54
     form.btn_ManifestOne.Top = 54
     form.btn_AddIce.Top = 54
 End If
