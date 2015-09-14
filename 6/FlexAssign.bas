@@ -119,7 +119,8 @@ Do Until Sheet6.Cells(ERow, ecol) = ""
     Call BZsendKey("@e")
 
 ErrorChecker
-
+    dim bluerow as Integer
+    dim tempStr as String
     bluerow = 10
     miscdata = BZreadscreen(8, bluerow, 18)
     Do Until Trim(miscdata) = ""
@@ -131,18 +132,22 @@ CheckingPage:
                 pieces = pieces + 1
             ElseIf bluerow = 19 Then
                 Call BZwritescreen("          ", 7, 24)
-                Call BZwritescreen(cannum(i), 7, 24)
+                tempstr = cannum(i)
+                Call BZwritescreen(tempstr, 7, 24)
                 Call BZwritescreen("    ", 7, 53)
-                Call BZwritescreen(canDest(i), 7, 53)
+                tempstr = candest(i)
+                Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
                 bluerow = 10
                 GoTo CheckingPage
             Else
                 Call BZwritescreen("          ", 7, 24)
-                Call BZwritescreen(cannum(i), 7, 24)
+                tempstr = cannum(i)
+                Call BZwritescreen(tempstr, 7, 24)
                 Call BZwritescreen("    ", 7, 53)
-                Call BZwritescreen(canDest(i), 7, 53)
+                tempstr = canDest(i)
+                Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
             End If
