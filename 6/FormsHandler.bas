@@ -175,15 +175,16 @@ End If
 
 Dim datarow As Integer
 datarow = 3
-
+Dim cannum As String
 Do While Sheet4.Cells(datarow, 1) <> ""
+    cannum = Sheet4.Cells(datarow, 1).text
     Call GhostAssign.filterClear
     Call Module1.DEL
     Call Module1.SETUP
     'Call GhostAssign.GrabAssigned(3, Sheet4.Cells(datarow, 1).text)
     Dim excelrow As Integer
-    excelrow = GhostAssign.GrabAssign(Sheet4.Cells(datarow, 1).text)
-    Call Assign023(form.CanSelectGUI.text)
+    excelrow = GhostAssign.GrabAssign(cannum)
+    Call Assign023(cannum)
     Call DGscreenChooser("viewawb")
 
     'setup format and variables for VAWB section
@@ -197,7 +198,7 @@ Do While Sheet4.Cells(datarow, 1) <> ""
     Call Module4.APOPfix
     
     BORG.labelUpdater.Caption = "Sorting your data..."
-    Call Module4.SORT_MACRO
+    Call Module4.SORT_MACRO(cannum)
     
     BORG.labelUpdater.Caption = "Counting Gas"
     Call Module4.gasCount
@@ -246,6 +247,8 @@ BORG.labelUpdater.Caption = "Running Fixes"
 Call Module4.APOPfix
 
 BORG.labelUpdater.Caption = "Sorting your data..."
+Dim cannum As String
+cannum = form.CanSelectGUI.text
 Call Module4.SORT_MACRO
 
 BORG.labelUpdater.Caption = "Counting Gas"
@@ -568,5 +571,6 @@ End Sub
 Sub borg_userform_queryClose(form As Object)
 Call FormsHandler.borg_btnClose_Click(form)
 End Sub
+
 
 
