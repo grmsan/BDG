@@ -26,7 +26,7 @@ Loop
 End Sub
 
 
-Sub SORT_MACRO()
+Sub SORT_MACRO(cannum As String)
 Sheet1.Columns("A:A").NumberFormat = "000000000000"
 Sheet1.Columns("C:C").NumberFormat = "0000"
 ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
@@ -61,6 +61,7 @@ End If
         .Apply
     End With
     
+Sheet2.Cells(2, 6).Value = cannum
 
 If BORG.StationSort = True Then
     Call Module4.HAZ_LIST_w_Station
@@ -80,7 +81,7 @@ y = 3
 TwoRow = 6
 oldURSA = ""
 'OpenBlueZone.ExcelRow = 95
-Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
+'Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
 Do Until Sheet1.Cells(y, 1) = ""
     y = y + 1
 Loop
@@ -189,7 +190,7 @@ col = 2
 y = 3
 TwoRow = 6
 oldURSA = ""
-Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
+'Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
 Do Until Sheet1.Cells(y, 1) = ""
 y = y + 1
 
@@ -263,7 +264,7 @@ y = 3
 TwoRow = 6
 oldURSA = ""
 
-Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
+'Sheet2.Cells(2, 6).Value = UCase(BORG.CanSelectGUI.Value)
 Do Until Sheet1.Cells(y, 1) = ""
     y = y + 1
 Loop
@@ -413,3 +414,5 @@ BORG.labelUpdater.Caption = "Counting Pieces"
 Call Module4.pieceCount
 
 End Sub
+
+
