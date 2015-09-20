@@ -249,7 +249,7 @@ Call Module4.APOPfix
 BORG.labelUpdater.Caption = "Sorting your data..."
 Dim cannum As String
 cannum = form.CanSelectGUI.text
-Call Module4.SORT_MACRO
+Call Module4.SORT_MACRO(cannum)
 
 BORG.labelUpdater.Caption = "Counting Gas"
 Call Module4.gasCount
