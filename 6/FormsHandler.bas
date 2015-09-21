@@ -177,7 +177,7 @@ Dim datarow As Integer
 datarow = 3
 Dim cannum As String
 Do While Sheet4.Cells(datarow, 1) <> ""
-    cannum = Sheet4.Cells(datarow, 1).text
+    
     Call GhostAssign.filterClear
     Call Module1.DEL
     Call Module1.SETUP
@@ -198,7 +198,10 @@ Do While Sheet4.Cells(datarow, 1) <> ""
     Call Module4.APOPfix
     
     BORG.labelUpdater.Caption = "Sorting your data..."
-    Call Module4.SORT_MACRO(cannum)
+    cannum = Sheet4.Cells(datarow, 1).text
+    candest = Sheet4.Cells(datarow, 3).text
+    haztype = Sheet4.Cells(datarow, 4).text
+    Call Module4.SORT_MACRO(cannum, candest, haztype)
     
     BORG.labelUpdater.Caption = "Counting Gas"
     Call Module4.gasCount
@@ -248,8 +251,20 @@ Call Module4.APOPfix
 
 BORG.labelUpdater.Caption = "Sorting your data..."
 Dim cannum As String
-cannum = form.CanSelectGUI.text
-Call Module4.SORT_MACRO(cannum)
+Dim candest As String
+Dim haztype As String
+Dim datarow As Integer
+datarow = 3
+Do Until Sheet3.Cells(datarow, 12) = form.CanSelectGUI.text
+    'u = Trim(form.CanSelectGUI.text)
+    'uu = Trim(Sheet3.Cells(datarow, 12))
+    datarow = datarow + 1
+Loop
+cannum = Sheet3.Cells(datarow, 12).text
+candest = Sheet3.Cells(datarow, 13).text
+haztype = ""
+
+Call Module4.SORT_MACRO(cannum, candest, haztype)
 
 BORG.labelUpdater.Caption = "Counting Gas"
 Call Module4.gasCount
