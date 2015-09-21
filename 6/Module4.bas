@@ -26,7 +26,7 @@ Loop
 End Sub
 
 
-Sub SORT_MACRO(cannum As String)
+Sub SORT_MACRO(cannum As String, candest As String, haztype As String)
 Sheet1.Columns("A:A").NumberFormat = "000000000000"
 Sheet1.Columns("C:C").NumberFormat = "0000"
 ActiveWorkbook.Worksheets("Sheet1").Sort.SortFields.Clear
@@ -61,7 +61,16 @@ End If
         .Apply
     End With
     
-Sheet2.Cells(2, 6).Value = cannum
+Sheet2.Cells(2, 6).Value = UCase(cannum)
+
+If candest <> "" Then
+    Sheet2.Cells(3, 1).Value = "With Destination of: " & candest
+End If
+If haztype <> "" Then
+    Sheet2.Cells(3, 1).text = Sheet2.Cells(3, 1).text & " HazType: " & haztype
+End If
+
+Sheet2.Cells(2, 4).text = BORG.Location.text
 
 If BORG.StationSort = True Then
     Call Module4.HAZ_LIST_w_Station
