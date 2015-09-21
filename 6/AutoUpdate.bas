@@ -1,4 +1,4 @@
-Public Const strThisVer As String = "6.002"
+Public Const strThisVer As String = "6.007"
 
 Public Const strFileName As String = "BDG"
 
@@ -50,7 +50,13 @@ Next
         .DeleteLines 2, 1
     End With
     
-x = MsgBox("BDG is now up to date!", vbInformation)
+x = MsgBox("BDG is now up to date!" & vbNewLine & "BDG will close now to save updates.", vbInformation)
+
+ActiveWorkbook.Save
+Application.Quit
+
+'Application.Quit
+'ActiveWorkbook.Close SaveChanges:=True
 
 End Sub
 
