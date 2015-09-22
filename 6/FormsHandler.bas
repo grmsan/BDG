@@ -174,16 +174,23 @@ If Sheet4.Cells(3, 1) = "" Then
 End If
 
 Dim datarow As Integer
-datarow = 3
 Dim cannum As String
+Dim candest As String
+Dim haztype As String
+Dim excelrow As Integer
+
+datarow = 3
 Do While Sheet4.Cells(datarow, 1) <> ""
+    cannum = Sheet4.Cells(datarow, 1).text
+    candest = Sheet4.Cells(datarow, 3).text
+    haztype = Sheet4.Cells(datarow, 4).text
     
     Call GhostAssign.filterClear
     Call Module1.DEL
     Call Module1.SETUP
-    'Call GhostAssign.GrabAssigned(3, Sheet4.Cells(datarow, 1).text)
-    Dim excelrow As Integer
+        
     excelrow = GhostAssign.GrabAssign(cannum)
+    
     Call Assign023(cannum)
     Call DGscreenChooser("viewawb")
 
@@ -198,9 +205,6 @@ Do While Sheet4.Cells(datarow, 1) <> ""
     Call Module4.APOPfix
     
     BORG.labelUpdater.Caption = "Sorting your data..."
-    cannum = Sheet4.Cells(datarow, 1).text
-    candest = Sheet4.Cells(datarow, 3).text
-    haztype = Sheet4.Cells(datarow, 4).text
     Call Module4.SORT_MACRO(cannum, candest, haztype)
     
     BORG.labelUpdater.Caption = "Counting Gas"
@@ -586,6 +590,3 @@ End Sub
 Sub borg_userform_queryClose(form As Object)
 Call FormsHandler.borg_btnClose_Click(form)
 End Sub
-
-
-
