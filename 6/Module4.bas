@@ -67,10 +67,10 @@ If candest <> "" Then
     Sheet2.Cells(3, 1).Value = "With Destination of: " & candest
 End If
 If haztype <> "" Then
-    Sheet2.Cells(3, 1).text = Sheet2.Cells(3, 1).text & " HazType: " & haztype
+    Sheet2.Cells(3, 1) = Sheet2.Cells(3, 1).text & " HazType: " & haztype
 End If
 
-Sheet2.Cells(2, 4).text = BORG.Location.text
+Sheet2.Cells(2, 4) = BORG.Location.text
 
 If BORG.StationSort = True Then
     Call Module4.HAZ_LIST_w_Station
