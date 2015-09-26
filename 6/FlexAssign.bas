@@ -2,7 +2,7 @@
 Dim cannum As Variant
 Dim canType As Variant
 Dim canSplit As Variant
-Dim canDest As Variant
+Dim candest As Variant
 Dim ADGfind As Variant
 Dim IDGfind As Variant
 Dim pieces As Integer
@@ -16,7 +16,7 @@ If can = "ALL" Then
 Else
     cannum = Array(BORG.txt_canNum.text)
     canSplit = Array(BORG.combo_splitName.text)
-    canDest = Array(BORG.txt_Dest.text)
+    candest = Array(BORG.txt_Dest.text)
     canType = Array(BORG.combo_hazType.text)
 End If
 
@@ -60,18 +60,30 @@ Dim c_cannums As New Collection
 Dim c_cansplits As New Collection
 Dim c_candests As New Collection
 Dim c_cantypes As New Collection
+mytypes = Array("ADG", "ALL", "IDG")
+t = 0
+
+addtocollections:
 row = 3
 Do While Sheet4.Cells(row, 1) <> ""
-   c_cannums.Add Sheet4.Cells(row, 1) '  dynamically add value to the end
-   c_cansplits.Add Sheet4.Cells(row, 2)
-   c_candests.Add Sheet4.Cells(row, 3)
-   c_cantypes.Add Sheet4.Cells(row, 4)
+    If Trim(Sheet4.Cells(row, 4)) = mytypes(t) Then
+       c_cannums.Add Sheet4.Cells(row, 1) '  dynamically add value to the end
+       c_cansplits.Add Sheet4.Cells(row, 2)
+       c_candests.Add Sheet4.Cells(row, 3)
+       c_cantypes.Add Sheet4.Cells(row, 4)
+    End If
    row = row + 1
 Loop
 
+If t < 2 Then
+    t = t + 1
+    GoTo addtocollections
+End If
+
+
 cannum = toArray(c_cannums) 'convert collection to an array
 canSplit = toArray(c_cansplits)
-canDest = toArray(c_candests)
+candest = toArray(c_candests)
 canType = toArray(c_cantypes)
 End Sub
 
@@ -119,8 +131,8 @@ Do Until Sheet6.Cells(ERow, ecol) = ""
     Call BZsendKey("@e")
 
 ErrorChecker
-    dim bluerow as Integer
-    dim tempStr as String
+    Dim bluerow As Integer
+    Dim tempstr As String
     bluerow = 10
     miscdata = BZreadscreen(8, bluerow, 18)
     Do Until Trim(miscdata) = ""
@@ -146,7 +158,7 @@ CheckingPage:
                 tempstr = cannum(i)
                 Call BZwritescreen(tempstr, 7, 24)
                 Call BZwritescreen("    ", 7, 53)
-                tempstr = canDest(i)
+                tempstr = candest(i)
                 Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
@@ -193,7 +205,7 @@ CheckingPagePrefix:
                         tempstr = cannum(i)
                         Call BZwritescreen(tempstr, 7, 24)
                         Call BZwritescreen("    ", 7, 53)
-                        tempstr = canDest(i)
+                        tempstr = candest(i)
                         Call BZwritescreen(tempstr, 7, 53)
                         Call BZsendKey("@e")
                         ignored = 0
@@ -203,7 +215,7 @@ CheckingPagePrefix:
                             datarow = 3
                             Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
                                 Sheet4.Cells(datarow, 2) = canSplit(i) And _
-                                Sheet4.Cells(datarow, 3) = canDest(i) And _
+                                Sheet4.Cells(datarow, 3) = candest(i) And _
                                 Sheet4.Cells(datarow, 4) = canType(i)
                                 datarow = datarow + 1
                             Loop
@@ -216,7 +228,7 @@ CheckingPagePrefix:
                         tempstr = cannum(i)
                         Call BZwritescreen(tempstr, 7, 24)
                         Call BZwritescreen("    ", 7, 53)
-                        tempstr = canDest(i)
+                        tempstr = candest(i)
                         Call BZwritescreen(tempstr, 7, 53)
                         Call BZsendKey("@e")
                         ignored = 0
@@ -226,7 +238,7 @@ CheckingPagePrefix:
                             datarow = 3
                             Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
                                 Sheet4.Cells(datarow, 2) = canSplit(i) And _
-                                Sheet4.Cells(datarow, 3) = canDest(i) And _
+                                Sheet4.Cells(datarow, 3) = candest(i) And _
                                 Sheet4.Cells(datarow, 4) = canType(i)
                                 datarow = datarow + 1
                             Loop
@@ -306,7 +318,7 @@ ElseIf errormisc = "095" Then 'bulk doesn't exist
     datarow = 3
     Do Until Sheet4.Cells(datarow, 1) = oldbulk And _
         Sheet4.Cells(datarow, 2) = canSplit(i) And _
-        Sheet4.Cells(datarow, 3) = canDest(i) And _
+        Sheet4.Cells(datarow, 3) = candest(i) And _
         Sheet4.Cells(datarow, 4) = canType(i)
         datarow = datarow + 1
     Loop
@@ -315,3 +327,5 @@ ElseIf errormisc = "INV" Then 'invalid container error
     MsgBox ("invalid container")
 End If
 End Function
+
+
