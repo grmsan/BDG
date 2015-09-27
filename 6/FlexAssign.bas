@@ -151,6 +151,17 @@ CheckingPage:
                 Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
+                If cannum(i) = "BULK*" Then
+                            cannum(i) = BZreadscreen(9, 7, 24)
+                            datarow = 3
+                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
+                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
+                                Sheet4.Cells(datarow, 3) = candest(i) And _
+                                Sheet4.Cells(datarow, 4) = canType(i)
+                                datarow = datarow + 1
+                            Loop
+                        Sheet4.Cells(datarow, 1) = cannum(i)
+                        End If
                 bluerow = 10
                 GoTo CheckingPage
             Else
@@ -327,5 +338,7 @@ ElseIf errormisc = "INV" Then 'invalid container error
     MsgBox ("invalid container")
 End If
 End Function
+
+
 
 
