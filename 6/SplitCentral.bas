@@ -19,7 +19,7 @@ excelrow = 5
 excelcol = 2
 Do Until Sheet6.Cells(2, excelcol).text = SplitName
     If Sheet6.Cells(2, excelcol).text = "" Then
-        sortmen.Height = 126.75
+        'sortmen.Height = 126.75
         Exit Sub
     End If
     excelcol = excelcol + 1
@@ -179,3 +179,5 @@ Do Until Sheet6.Cells(row, col) = ""
     row = row + 1
 Loop
 End Sub
+
+
