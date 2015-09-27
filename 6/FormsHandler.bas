@@ -52,24 +52,33 @@ End If
 End Sub
 
 Sub borg_btn_AddCan_Click(form As Object)
-myCannum = form.txt_canNum
-mySplit = form.combo_splitName
+mycannum = form.txt_canNum
+mysplit = form.combo_splitName
 myDest = form.txt_Dest
 myType = form.combo_hazType
 
-If myCannum = "" Or mySplit = "" Or myDest = "" Or myType = "" Then
+If mycannum = "" Or mysplit = "" Or myDest = "" Or myType = "" Then
     form.labelUpdater.Caption = "ERROR: PLEASE FILL IN ALL INFORMATION BEFORE ADDING A NEW CAN"
     Exit Sub
 End If
 
 x = 2
 Do Until Sheet4.Cells(x, 1) = ""
-    If Sheet4.Cells(x, 1).text = myCannum Then Exit Do
+    If Sheet4.Cells(x, 1).text = mycannum Then
+        If mycannum <> "bulk*" Then
+            Exit Do
+        Else
+            If Sheet4.Cells(x, 2) = mysplit And _
+               Sheet4.Cells(x, 4) = myType Then
+               Exit Do
+            End If
+        End If
+    End If
     x = x + 1
 Loop
 
-Sheet4.Cells(x, 1) = myCannum
-Sheet4.Cells(x, 2) = mySplit
+Sheet4.Cells(x, 1) = mycannum
+Sheet4.Cells(x, 2) = mysplit
 Sheet4.Cells(x, 3) = myDest
 Sheet4.Cells(x, 4) = myType
 Sheet4.Cells(x, 5) = "--"
@@ -590,3 +599,4 @@ End Sub
 Sub borg_userform_queryClose(form As Object)
 Call FormsHandler.borg_btnClose_Click(form)
 End Sub
+
