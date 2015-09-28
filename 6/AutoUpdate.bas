@@ -52,7 +52,10 @@ Next
     
 x = MsgBox("BDG is now up to date!" & vbNewLine & "BDG will close now to save updates.", vbInformation)
 
-ActiveWorkbook.Save
+For Each W In Application.Workbooks
+    W.Save
+Next W
+
 Application.Wait(Now + TimeValue("00:00:01"))
 Application.Quit
 
