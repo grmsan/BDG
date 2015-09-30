@@ -331,6 +331,7 @@ ElseIf errormisc = "095" Then 'bulk doesn't exist
         Sheet4.Cells(datarow, 2) = canSplit(i) And _
         Sheet4.Cells(datarow, 3) = candest(i) And _
         Sheet4.Cells(datarow, 4) = canType(i)
+        If Sheet4.Cells(datarow, 1) = "" Then Exit Do
         datarow = datarow + 1
     Loop
     Sheet4.Cells(datarow, 1) = cannum(i)
