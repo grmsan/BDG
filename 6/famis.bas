@@ -11,173 +11,110 @@ Option Compare Text
 
 Sub famislogin()
 famislogingui.Show
-ChDir "C:\"
-Set host = CreateObject("BZwhll.whllobj")
-retval = host.OpenSession(0, 11, "fdx3270.zmd", 30, 1)
-host.WaitCursor 1, 9, 1, 1
-retval = host.Connect("K")
 
-Set Wnd = host.Window() ' Makes the window invisible.....
-Wnd.Visible = True
-host.waitready 1, 51
 retrylogin:
-host.sendkey "@c"
-host.waitready 1, 51
 
-host.readscreen miscdata, 11, 3, 32
+Call BZsendKey("@c", True)
+
+miscdata = BZreadscreen(11, 3, 32)
 If miscdata = "FAMIS LOGON" Then GoTo famislogin
 
-host.sendkey "45@e"
-host.waitready 1, 51
+Call BZsendKey("45@e", True)
 
 famislogin:
-    host.writescreen famislogingui.empnum, 5, 39
-    host.writescreen famislogingui.famispassword, 6, 39
-    host.sendkey "@e"
-    host.waitready 1, 51
+    Call BZwritescreen(famislogingui.EmpNum, 5, 39)
+    Call BZwritescreen(famislogingui.famispassword, 6, 39)
+    Call BZsendKey("@e")
 
-host.readscreen readerror, 78, 23, 2
+readerror = BZreadscreen(78, 23, 2)
 If InStr(1, readerror, "FEDEX ID MISSING/INVALID") > 1 Or _
    InStr(1, readerror, "ENTERED PASSWORD DOES NOT MATCH PERSONNEL DATABASE") > 1 Then
    MsgBox ("Your Famis Username/Password were invalid" & vbNewLine & "Please try again")
     famislogingui.famispassword = ""
     famislogingui.Show
    If famislogingui.famispassword = "" Then
-    Call DGscreenChooser("close", host)
+    Call DGscreenChooser("close")
     GrabCloseScreen
     Exit Sub
    Else
-    host.writescreen "          ", 5, 39
+    Call BZwritescreen("          ", 5, 39)
     GoTo retrylogin
    End If
    Exit Sub
 End If
 
-host.readscreen whatmenu, 12, 4, 30
-
-host.sendkey "@3"
-host.waitready 1, 51
-host.sendkey "1"
-host.waitready 1, 51
-host.sendkey "@e"
-host.waitready 1, 51
-host.sendkey "8"
-host.waitready 1, 51
-host.sendkey "@e"
-host.waitready 1, 51
+whatmenu = BZreadscreen(12, 4, 30)
+Call BZsendKey("@3", True)
+Call BZsendKey("1", True)
+Call BZsendKey("@e", True)
+Call BZsendKey("8", True)
+Call BZsendKey("@e", True)
 
 ULDprimMenu:
-host.writescreen "6", 2, 11
-host.waitready 1, 51
-host.writescreen BORG.Location, 4, 12
-host.waitready 1, 51
-host.sendkey "@E"
-host.waitready 1, 51
+Call BZwritescreen("3", 2, 11, True)
+Call BZwritescreen(BORG.Location, 4, 12, True)
+Call BZsendKey("@E", True)
 
-host.readscreen readerror, 5, 1, 13
+readerror = BZreadscreen(5, 1, 13)
 If readerror = "FS180" Then GoTo ULDprimMenu
 
 ULDdamagedMenu:
-host.sendkey "2@E"
-host.waitready 1, 51
-host.sendkey "@E"
-host.waitready 1, 51
-host.readscreen readerror, 6, 1, 13
-If readerror = "FS186 " Then GoTo ULDdamagedMenu
+Call BZsendKey("2@E", True)
+readerror = BZreadscreen(6, 1, 13)
+If readerror <> "FS1832" Then GoTo ULDdamagedMenu
 
 Dim row As Integer
 row = 3
+Dim bluerow As Integer
+bluerow = 9
+
+For i = 0 To 7
+    Call BZwritescreen("          ", i + 9, 2)
+Next
 
 Do While Sheet4.Cells(row, 1) <> ""
-    Call famiscancheck(Sheet4.Cells(row, 1).text, row)
-    row = row + 1
+    If InStr(1, "BULK", Sheet4.Cells(row, 1)) <> 0 Then
+        row = row + 1
+    Else
+        Call BZwritescreen(Sheet4.Cells(row, 1).text, bluerow, 2)
+        If bluerow = 16 Or Sheet4.Cells(row + 1, 1) = "" Then
+            Call BZsendKey("@E", True)
+            Call famischeckcans
+            bluerow = 8
+        End If
+        row = row + 1
+        bluerow = bluerow + 1
+    End If
 Loop
 
 BORG.labelUpdater.Caption = "Finished checking cans..."
 
 End Sub
+Sub famischeckcans()
+screencheck = BZreadscreen(6, 1, 13)
+If screencheck <> "FS1832" Then Exit Sub
 
-Sub famiscancheck(can As String, row As Integer)
-
-mytext = can
-
-CanEntertime:
-host.writescreen "           ", 4, 16
-host.writescreen mytext, 4, 16
-host.sendkey "@e"
-host.readscreen readerror, 11, 5, 18
-
-If readerror = "SERVICEABLE" Then
-    Sheet4.Cells(row, 5) = "SV"
-ElseIf readerror = "DAMGD TRUCK" Then
-    Sheet4.Cells(row, 5) = "TO"
-ElseIf Trim(readerror) = "" Then
-    host.readscreen miscdata, 80, 24, 1
-    If InStr(1, miscdata, "Please Verify") >= 1 Then
-        mytext = InputBox(can & " is an invalid can please check can number and reenter below", "Invalid Can")
-        If mytext = "" Then Exit Sub
-        Sheet4.Cells(row, 1) = mytext
-        GoTo CanEntertime
-    End If
-Else
-    Sheet4.Cells(row, 5) = "NU"
-End If
-
-
-
-End Sub
-
-Sub famisDestCheck()
-
-host.sendkey "@3"
-host.waitready 1, 151
-host.sendkey "@3"
-host.waitready 1, 151
-
-host.sendkey "3"
-host.sendkey "@E"
-host.waitready 1, 151
-host.sendkey "2"
-host.sendkey "@E"
-host.waitready 1, 151
-
-
-row = 3
-
-destcheckStart:
-bluerow = 9
-Do Until Sheet4.Cells(row, 1) = ""
-    host.writescreen Sheet4.Cells(row, 1).text, bluerow, 2
-    If row > 8 Then
-        host.sendkey "@e"
-        host.waitready 1, 51
+Dim bluerow As Integer
+For bluerow = 9 To 16
+    miscdata = BZreadscreen(70, bluerow, 2)
+    If Trim(miscdata) = "" Then Exit Sub
+    If Trim(Right(miscdata, 60)) = "" Then
+        x = MsgBox(Trim(Left(miscdata, 10)) & " does not exist in System. Please re-check can number.", vbCritical, "Can Doesn't Exist!")
+    Else
+        cannum = Trim(Left(miscdata, 10))
+        svc = Mid(miscdata, 15, 2)
+        isLocal = InStr(1, miscdata, Left(BORG.Location.text, 3))
+        If isLocal <= 0 Then
+            Call MsgBox(cannum & " is not currently at your location in FAMIS. Please re-check can number to verify correct entry.", vbCritical, "ERROR: can not at location")
+        End If
+        Dim row As Integer
+        row = 3
+        Do Until Sheet4.Cells(row, 1) = cannum
+            row = row + 1
+        Loop
+        Sheet4.Cells(row, 5) = svc
         
-        GoTo destcheckStart
     End If
-bluerow = bluerow + 1
-row = row + 1
-Loop
+Next
 
-host.sendkey "@E"
-host.waitready 1, 51
-
-badcans = ""
-
-notAvail = False
-bluerow = 9
-Do Until bluerow >= 17
-    host.readscreen mydata, 80, bluerow, 1
-    If InStr(1, mydata, Left(BORG.Location.text, 3)) = 0 And Trim(mydata) <> "" Then
-        notAvail = True
-        host.readscreen badcan, 11, bluerow, 2
-        badcans = badcans & vbNewLine & badcan
-    End If
-    bluerow = bluerow + 1
-Loop
-
-If notAvail = True Then
-    MsgBox ("Error with cans in Famis." & vbNewLine & "Current cans are not at location set in login section: " & badcans)
-End If
 End Sub
-
-
