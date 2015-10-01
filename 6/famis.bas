@@ -1,12 +1,3 @@
-Dim host As Variant
-Private Declare Function MessageBox _
-Lib "User32" Alias "MessageBoxA" _
-(ByVal hWnd As Long, _
-ByVal lpText As String, _
-ByVal lpCaption As String, _
-ByVal wType As Long) _
-As Long
-
 Option Compare Text
 
 Sub famislogin()
