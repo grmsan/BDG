@@ -1,7 +1,7 @@
 
 Dim cannum As Variant
-Dim canType As Variant
-Dim canSplit As Variant
+Dim cantype As Variant
+Dim cansplit As Variant
 Dim candest As Variant
 Dim ADGfind As Variant
 Dim IDGfind As Variant
@@ -15,9 +15,9 @@ If can = "ALL" Then
     Call setupAssignArrays
 Else
     cannum = Array(BORG.txt_canNum.text)
-    canSplit = Array(BORG.combo_splitName.text)
+    cansplit = Array(BORG.combo_splitName.text)
     candest = Array(BORG.txt_Dest.text)
-    canType = Array(BORG.combo_hazType.text)
+    cantype = Array(BORG.combo_hazType.text)
 End If
 
 ADGfind = Array("1.4", "2.1", "3", "4.", "5", "8")
@@ -28,7 +28,7 @@ Dim i As Integer
 Dim hazFilter As String
 tempval = UBound(cannum, 1)
 For i = 0 To (UBound(cannum, 1))
-    Select Case canType(i)
+    Select Case cantype(i)
         Case "ADG"
             hazFilter = "A"
         Case "IDG"
@@ -39,7 +39,7 @@ For i = 0 To (UBound(cannum, 1))
             hazFilter = " "
     End Select
     Dim x As String
-    x = canSplit(i)
+    x = cansplit(i)
     If isSplitLocal(x) = True Then
         Call SuffixAssign(i, hazFilter)
     ElseIf isSplitLocal(x) = False Then
@@ -67,10 +67,10 @@ addtocollections:
 row = 3
 Do While Sheet4.Cells(row, 1) <> ""
     If Trim(Sheet4.Cells(row, 4)) = mytypes(t) Then
-       c_cannums.Add Sheet4.Cells(row, 1) '  dynamically add value to the end
-       c_cansplits.Add Sheet4.Cells(row, 2)
-       c_candests.Add Sheet4.Cells(row, 3)
-       c_cantypes.Add Sheet4.Cells(row, 4)
+       c_cannums.Add CStr(Sheet4.Cells(row, 1)) '  dynamically add value to the end
+       c_cansplits.Add CStr(Sheet4.Cells(row, 2))
+       c_candests.Add CStr(Sheet4.Cells(row, 3))
+       c_cantypes.Add CStr(Sheet4.Cells(row, 4))
     End If
    row = row + 1
 Loop
@@ -82,9 +82,9 @@ End If
 
 
 cannum = toArray(c_cannums) 'convert collection to an array
-canSplit = toArray(c_cansplits)
+cansplit = toArray(c_cansplits)
 candest = toArray(c_candests)
-canType = toArray(c_cantypes)
+cantype = toArray(c_cantypes)
 End Sub
 
 Function isUrsaLocal(URSA As String)
@@ -115,9 +115,9 @@ End Function
 Sub SuffixAssign(i As Integer, hazFilter As String)
 ecol = 3
 
-Do Until Sheet6.Cells(2, ecol) = canSplit(i)
+Do Until Sheet6.Cells(2, ecol) = cansplit(i)
     If Sheet6.Cells(2, ecol).Value = "" Then
-        MsgBox ("could not find split " & canSplit(i) & "for can " & cannum(i))
+        MsgBox ("could not find split " & cansplit(i) & "for can " & cannum(i))
         Exit Sub
     End If
     ecol = ecol + 1
@@ -151,17 +151,7 @@ CheckingPage:
                 Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
-                If cannum(i) = "BULK*" Then
-                            cannum(i) = BZreadscreen(9, 7, 24)
-                            datarow = 3
-                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
-                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
-                                Sheet4.Cells(datarow, 3) = candest(i) And _
-                                Sheet4.Cells(datarow, 4) = canType(i)
-                                datarow = datarow + 1
-                            Loop
-                        Sheet4.Cells(datarow, 1) = cannum(i)
-                        End If
+                Call bulkOveride(CStr(cannum(i)), CStr(cansplit(i)), CStr(candest(i)), CStr(cantype(i)))
                 bluerow = 10
                 GoTo CheckingPage
             Else
@@ -173,6 +163,7 @@ CheckingPage:
                 Call BZwritescreen(tempstr, 7, 53)
                 Call BZsendKey("@e")
                 Call FlexAssign.ErrorChecker
+                Call bulkOveride(CStr(cannum(i)), CStr(cansplit(i)), CStr(candest(i)), CStr(cantype(i)))
             End If
         End If
         bluerow = bluerow + 1
@@ -186,9 +177,9 @@ Sub PrefixAssign(i As Integer, hazFilter As String)
     Dim tempstr As String
     ecol = 3
     ignored = 0
-    Do Until Sheet6.Cells(2, ecol) = canSplit(i)
+    Do Until Sheet6.Cells(2, ecol) = cansplit(i)
         If Sheet6.Cells(2, ecol).Value = "" Then
-            MsgBox ("could not find split " & canSplit(i) & "for can " & cannum(i))
+            MsgBox ("could not find split " & cansplit(i) & "for can " & cannum(i))
             Exit Sub
         End If
         ecol = ecol + 1
@@ -221,17 +212,9 @@ CheckingPagePrefix:
                         Call BZsendKey("@e")
                         ignored = 0
                         Call FlexAssign.ErrorChecker
-                        If cannum(i) = "BULK*" Then
-                            cannum(i) = BZreadscreen(9, 7, 24)
-                            datarow = 3
-                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
-                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
-                                Sheet4.Cells(datarow, 3) = candest(i) And _
-                                Sheet4.Cells(datarow, 4) = canType(i)
-                                datarow = datarow + 1
-                            Loop
-                        Sheet4.Cells(datarow, 1) = cannum(i)
-                        End If
+                        tempcannum = CStr(cannum(i))
+                        
+                        Call bulkOveride(CStr(cannum(i)), CStr(cansplit(i)), CStr(candest(i)), CStr(cantype(i)))
                         bluerow = 10
                         GoTo CheckingPagePrefix
                     Else
@@ -244,17 +227,7 @@ CheckingPagePrefix:
                         Call BZsendKey("@e")
                         ignored = 0
                         Call FlexAssign.ErrorChecker
-                        If cannum(i) = "BULK*" Then
-                            cannum(i) = BZreadscreen(9, 7, 24)
-                            datarow = 3
-                            Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
-                                Sheet4.Cells(datarow, 2) = canSplit(i) And _
-                                Sheet4.Cells(datarow, 3) = candest(i) And _
-                                Sheet4.Cells(datarow, 4) = canType(i)
-                                datarow = datarow + 1
-                            Loop
-                            Sheet4.Cells(datarow, 1) = cannum(i)
-                        End If
+                        Call bulkOveride(CStr(cannum(i)), CStr(cansplit(i)), CStr(candest(i)), CStr(cantype(i)))
                     End If
                 Else
                     ignored = ignored + 1
@@ -328,9 +301,9 @@ ElseIf errormisc = "095" Then 'bulk doesn't exist
     cannum(i) = BZreadscreen(9, 7, 24)
     datarow = 3
     Do Until Sheet4.Cells(datarow, 1) = oldbulk And _
-        Sheet4.Cells(datarow, 2) = canSplit(i) And _
+        Sheet4.Cells(datarow, 2) = cansplit(i) And _
         Sheet4.Cells(datarow, 3) = candest(i) And _
-        Sheet4.Cells(datarow, 4) = canType(i)
+        Sheet4.Cells(datarow, 4) = cantype(i)
         If Sheet4.Cells(datarow, 1) = "" Then Exit Do
         datarow = datarow + 1
     Loop
@@ -338,6 +311,23 @@ ElseIf errormisc = "095" Then 'bulk doesn't exist
 ElseIf errormisc = "INV" Then 'invalid container error
     MsgBox ("invalid container")
 End If
+End Function
+
+Function bulkOveride(cannum As String, cansplit As String, candest As String, cantype As String)
+'bulkoveride(cannum(i), cansplit(i), candest(i), cantype(i))
+
+If cannum = "BULK*" Then
+    cannum = BZreadscreen(9, 7, 24)
+    datarow = 3
+    Do Until Sheet4.Cells(datarow, 1) = "BULK*" And _
+        Sheet4.Cells(datarow, 2) = cansplit And _
+        Sheet4.Cells(datarow, 3) = candest And _
+        Sheet4.Cells(datarow, 4) = cantype
+        datarow = datarow + 1
+    Loop
+Sheet4.Cells(datarow, 1) = cannum
+End If
+
 End Function
 
 
