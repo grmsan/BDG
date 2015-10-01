@@ -138,15 +138,15 @@ If BZmodule.bz_connected = False Then
     BORG.labelUpdater.Caption = "ERROR: Login to BDG and Bluezone to use this feature"
     Exit Sub
 End If
+form.Hide
 
 famislogingui.EmpNum = BORG.EmpNum
 
 famis.famislogin
-famis.famisDestCheck
+form.Show
+form.CanSelectGUI.Value = ""
+Call DGscreenChooser("close")
 
-BORG.CanSelectGUI.Clear
-Call DGscreenChooser("close", host)
-Call DGscreenChooser("close", host)
 GrabCloseScreen
 End Sub
 
@@ -169,7 +169,11 @@ If form.EmpNum.text = "" Or form.PasswordBox = "" Then
     MsgBox ("Please enter your FedEx ID and IMS password")
     Exit Sub
 End If
+Application.Visible = True
+Application.Visible = False
+
 Call OpenBlueZone.BZOpenSession
+
 End Sub
 
 Sub borg_btn_ManifestAll_Click(form As Object)
@@ -568,6 +572,33 @@ End If
 End Sub
 
 Sub borg_UserForm_Initialize(form As Object)
+
+BORG.btn_AddCan.Height = 18
+BORG.btn_AddCan.Left = 264
+BORG.btn_AddCan.Top = 2
+BORG.btn_AddCan.Width = 54
+
+BORG.btn_removeCan.Height = 18
+BORG.btn_removeCan.Left = 258
+BORG.btn_removeCan.Top = 26
+BORG.btn_removeCan.Width = 60
+
+BORG.btn_clearCans.Height = 18
+BORG.btn_clearCans.Left = 258
+BORG.btn_clearCans.Top = 48
+BORG.btn_clearCans.Width = 60
+
+BORG.btn_cancheck.Visible = True
+BORG.btn_cancheck.Height = 18
+BORG.btn_cancheck.Left = 258
+BORG.btn_cancheck.Top = 70
+BORG.btn_cancheck.Width = 60
+
+BORG.btn_ManifestAll.Height = 18
+BORG.btn_ManifestAll.Left = 258
+BORG.btn_ManifestAll.Top = 96
+BORG.btn_ManifestAll.Width = 60
+
 Call RetrieveOptions
 Call clearSVConCans
 
@@ -599,4 +630,6 @@ End Sub
 Sub borg_userform_queryClose(form As Object)
 Call FormsHandler.borg_btnClose_Click(form)
 End Sub
+
+
 
