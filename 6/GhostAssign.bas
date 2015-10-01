@@ -38,7 +38,7 @@ Function toArray(col As Collection)
   Dim arr() As Variant
   ReDim arr(0 To col.Count - 1) As Variant
   For i = 1 To col.Count
-      arr(i - 1) = col(i)
+      arr(i - 1) = CStr(col(i))
   Next
   toArray = arr
   Exit Function
@@ -621,3 +621,5 @@ Sub sortingsub()
         .Apply
     End With
 End Sub
+
+
