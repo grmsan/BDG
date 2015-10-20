@@ -305,7 +305,7 @@ Do Until SeqFinished = "018-LAST PAGE IS DISPLAYED"
             
             Sheet1.Cells(excelrow, 1).Value = FullAWB
             Sheet1.Cells(excelrow, 13).Value = cannum
-            APio = Mid(fullinfo, 43, 6)
+            APio = Mid(fullinfo, 42, 6)
                 If APio = "ALPKN1" Then
                     APnum = BZreadscreen(3, row, 50)
                     Sheet1.Cells(excelrow, 14).Value = Trim(APnum)
@@ -621,5 +621,7 @@ Sub sortingsub()
         .Apply
     End With
 End Sub
+
+
 
 
