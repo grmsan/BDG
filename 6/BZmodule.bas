@@ -28,7 +28,9 @@ Set openBlueZoneSession = host
 End Function
 
 Function BZreadscreen(length As Integer, x As Integer, y As Integer, Optional wait As Boolean = False) As String
-'On Error GoTo erroutread
+On Error GoTo erroutread
+Dim loopcheck As Integer
+loopcheck = 0
 read:
 Dim BZdata As String
 BZdata = ""
@@ -37,12 +39,12 @@ If wait = True Then host.waitready 1, 51
 BZreadscreen = BZdata
 Exit Function
 erroutread:
-    If Err.Number = "424" Or Err.Number = "91" Then
-        Set host = openBlueZoneSession
-        GoTo read
-    Else
-        MsgBox ("error" & Err.Number & " in bzreadscreen")
+    Set host = openBlueZoneSession
+    loopcheck = loopcheck + 1
+    If loopcheck >= 5 Then
+        Exit Function
     End If
+    GoTo read
     
 End Function
 Sub testcaller()
@@ -55,8 +57,9 @@ Call BZsendKey("@C")
 
 End Sub
 Function BZwritescreen(text As String, x As Integer, y As Integer, Optional wait As Boolean = False)
-'On Error GoTo erroutwrite
-
+On Error GoTo erroutwrite
+Dim loopcheck As Integer
+loopcheck = 0
 writeme:
 If TypeName(host) = "IWhllObj" Then
     host.writescreen text, x, y
@@ -66,22 +69,29 @@ Else
 End If
 Exit Function
 erroutwrite:
-    If Err.Number = "424" Then
-        Set host = openBlueZoneSession
-        GoTo writeme
-    Else
-        MsgBox ("error" & Err.Number & " in bzreadscreen")
+    Set host = openBlueZoneSession
+    loopcheck = loopcheck + 1
+    If loopcheck >= 5 Then
+        Exit Function
     End If
-    
+    GoTo writeme
 End Function
 
 Function BZsendKey(text As String, Optional wait As Boolean = True)
 On Error GoTo erroutSend
+Dim loopcheck As Integer
+loopcheck = 0
+pushkey:
 host.sendkey text
 If wait = True Then host.waitready 1, 51
 Exit Function
 erroutSend:
-MsgBox (Err.Number)
+    Set host = openBlueZoneSession
+    loopcheck = loopcheck + 1
+    If loopcheck >= 5 Then
+        Exit Function
+    End If
+    GoTo pushkey
 End Function
 
 Sub BZgotoAUTOdg()
@@ -92,8 +102,9 @@ If BZmodule.BZConnected() Then
 End If
 End Sub
 
-Function BZLogin(EmpNum As String, password As String) As Boolean
+Function BZLogin(empnum As String, password As String) As Boolean
 'Call BZsendKey("@C")
+'Call BZsendKey("STSA@E", True)
 Call BZsendKey("ims@E", True)
 
 fedex = BZreadscreen(35, 1, 23)
@@ -109,7 +120,7 @@ Do Until fedex = "F E D E R A L  E X P R E S S  I M S"
     End If
 Loop
 
-Call BZwritescreen(EmpNum, 7, 15)
+Call BZwritescreen(empnum, 7, 15)
 Call BZwritescreen(password, 7, 43)
 password = ""
 Call BZsendKey("@E", True)
@@ -151,7 +162,7 @@ Else
     Call BZsendKey("asap@e", True) 'types ASAP and enters command
     miscdata = BZreadscreen(32, 1, 2)
     If miscdata = "ASAP COMMAND IS UNKNOWN TO VTAM." Or miscdata = "APPLICATION NOT ACTIVE.         " Then
-        res = BZLogin(BORG.EmpNum, BORG.PasswordBox)
+        res = BZLogin(BORG.empnum, BORG.PasswordBox)
         If res = False Then
             DGscreenChooser = False
             Exit Function
@@ -208,6 +219,8 @@ BORG.labelUpdater.Caption = "Closing Previous Sesson..."
 Application.wait Now + TimeValue("00:00:01")
 
 End Sub
+
+
 
 
 
