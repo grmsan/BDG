@@ -423,7 +423,7 @@ Loop
 End Function
 
 Function RetrieveOptions()
-BORG.EmpNum = Sheet4.Cells(2, 8)
+BORG.empnum = Sheet4.Cells(2, 8)
 BORG.PW_remember = Sheet4.Cells(4, 8)
 
 If BORG.PW_remember = True Then
@@ -443,7 +443,7 @@ BORG.booGhostShow = Sheet4.Cells(12, 8)
 End Function
 
 Function SaveOptions()
-Sheet4.Cells(2, 8) = BORG.EmpNum
+Sheet4.Cells(2, 8) = BORG.empnum
 Sheet4.Cells(4, 8) = BORG.PW_remember
 
 If BORG.PW_remember = True Then
@@ -470,3 +470,5 @@ row = row + 1
 Loop
 
 End Function
+
+
