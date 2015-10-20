@@ -8,15 +8,23 @@ Sub Directions(excelrow As Integer)
 
 Dim special As Integer
 special = 0
+
+Dim ship023 As Boolean
+ship023 = False
+
+
 If Sheet1.Cells(excelrow, 16).Value > 0 Then
     Call VAWB.VerifySpecial(excelrow, True)
     special = 1
-    End If
-If Sheet1.Cells(excelrow, 14).Value > 0 Then
+ElseIf Sheet1.Cells(excelrow, 14).Value > 0 Then
     Call VAWB.VerifySpecial(excelrow, False)
     special = 1
-    End If
-If special = 0 Then Call VAWB.VerifyAWB(excelrow)
+ElseIf Left(Sheet1.Cells(excelrow, 1).text, 4) = "0023" Then
+    ship023 = True
+    Call verify023(excelrow)
+Else
+    Call VAWB.VerifyAWB(excelrow)
+End If
 
 Call VAWB.VAWB_Origin(excelrow)
 Call VAWB.Assembly(excelrow)
@@ -26,9 +34,7 @@ row = 17
 
 Dim unpos As Integer
 Dim clspos As Integer
-
 Dim raw As String
-raw = ""
 
 Do Until Sheet3.Cells(row, 2).Value = ""
     raw = Sheet3.Cells(row, 2).text
@@ -38,7 +44,6 @@ Do Until Sheet3.Cells(row, 2).Value = ""
     Call VAWB.VAWB_WT(raw, excelrow, row, special, clspos)
     If special = 1 Then
         Call VAWB.VAWB_PG(raw, excelrow, row, clspos)
-        
         Call VAWB.NumPcs(raw, excelrow, row, special)
     End If
     
@@ -56,7 +61,7 @@ errout:
 End Sub
 
 Sub VerifySpecial(excelrow As Integer, OP As Boolean)
-On Error GoTo errout
+'On Error GoTo errout
 
 If OP = True Then
     datarow = 16
@@ -104,7 +109,7 @@ verifyingOP:
     If OP_ID <> "   " And OPpcs <> "   " Then
         OP_ID = CInt(OP_ID)
         OPpcs = CInt(OPpcs)
-        u = Trim(Sheet1.Cells(excelrow, 6).Value)
+        U = Trim(Sheet1.Cells(excelrow, 6).Value)
         ul = Trim(URSAcheck)
         uu = Sheet1.Cells(excelrow, datarow).Value
         uul = OP_ID
@@ -131,14 +136,131 @@ If Err.Number = 13 Then 'trying to int a str
     MsgBox ("error 13 in Verify OP " & Err.Description)
 End If
 End Sub
+Sub verify023(excelrow As Integer)
+Dim lineread As String
+Dim lineread2 As String
+Dim lineread3 As String
+Dim misc As String
+Dim verify As Integer
+verify = 0
+Dim RQcheck As String
+RQcheck = 0
+Dim URSAcheck As String
+URSAcheck = 0
+Dim UNcheck As String
+UNcheck = 0
+Dim AWBcheck As String
+AWBcheck = 0
+Dim bluerow As Integer
+bluerow = 6
 
-Sub VerifyAWB(excelrow)
-On Error GoTo errout
+Dim firstrun As Integer
+firstrun = 0
+
+If excelrow = 0 Then
+    excelrow = Sheet3.Cells(2, 1).Value
+End If
+If Sheet1.Cells(excelrow, 4).Value = "UN1845" Then
+    Sheet1.Cells(excelrow, 5).Value = "Dry Ice"
+    Exit Sub
+End If
+
+GoTo VAWBMainLoop
+
+SearchVAWB:
+firstrun = 1
+
+Do Until lastshipment = "306"
+lastshipment = BZreadscreen(3, 24, 2)
+    If lastshipment = "305" Then
+        shipbegin = 1 'we've reached the beginning
+    ElseIf lastshipment = "306" Then
+        shipend = 1 'we've reached the end
+    End If
+    
+    If shipbegin = 0 Then
+        Call BZsendKey("@1")
+    ElseIf shipend = 0 Then
+        Call BZsendKey("@2")
+    Else
+        Exit Sub 'we fubbed up
+    End If
+lastshipment = BZreadscreen(3, 24, 2)
+
+VAWBMainLoop:
+    Dim col As Integer
+    col = 6
+    AWBcheck = BZreadscreen(4, 4, 14)
+    URSAcheck = BZreadscreen(8, 4, 35)
+    lineread = BZreadscreen(80, bluerow, 1)
+    RQcheck = BZreadscreen(2, 6, 6)
+    normCheck = BZreadscreen(19, 4, 61)
+    norm = Trim(normCheck) 'should = ""
+
+    If RQcheck = "RQ" Then 'if RQ is found then move UN starting position over accordingly
+        col = col + 4 'Moving col over for UNcheck to work properly
+    Else: col = 6
+    End If
+
+    UNcheck = BZreadscreen(6, bluerow, col)
+
+    x = (" " & Sheet1.Cells(excelrow, 9).Value & " PIECE")
+    PCs_CHK = InStr(1, lineread, x)
+    If PCs_CHK = 0 Then
+        lineread2 = BZreadscreen(78, bluerow + 1, 1)
+        x = (" " & Sheet1.Cells(excelrow, 9).Value & " PIECE")
+        PCs_CHK = InStr(1, lineread2, x)
+        If PCs_CHK = 0 Then
+            misc = BZreadscreen(3, 13, 26)
+            PCs_CHK = InStr(1, misc, Sheet1.Cells(excelrow, 9).Value)
+        End If
+    End If
+
+    WTchk = InStr(1, lineread, Sheet1.Cells(excelrow, 10).Value)
+        U = Sheet1.Cells(excelrow, 10).Value
+        If WTchk = 0 Then
+            lineread2 = BZreadscreen(78, bluerow + 1, 1)
+            WTchk = InStr(1, lineread2, Sheet1.Cells(excelrow, 10).Value)
+        End If
+        If WTchk = 0 Then
+            lineread3 = BZreadscreen(78, bluerow + 2, 1)
+            WTchk = InStr(1, lineread3, Sheet1.Cells(excelrow, 10).Value)
+        End If
+
+PSNTEMP = Trim(Sheet1.Cells(excelrow, 5).Value)
+If PSNTEMP = "RADIOACTIV" Or PSNTEMP = "Radioactive, Excepted Qty" Then PSNTEMP = "RADIOACTIVE"
+    PSNchk = InStr(1, lineread, PSNTEMP)
+    If PSNchk > 1 Then
+        If AWBcheck = Sheet1.Cells(excelrow, 3).text Then  'checks last 4 awb with those on assign screen
+            UNTEMP = Sheet1.Cells(excelrow, 4).Value
+            If Sheet1.Cells(excelrow, 4).Value = UNcheck Then 'checks UNnumber
+                If Trim(Sheet1.Cells(excelrow, 6).Value) = Trim(URSAcheck) Then 'checks ursa from that from assign screen
+                    If PCs_CHK > 1 Or PSNTEMP = "RADIOACTIVE" Then 'check pcs
+                        If (WTchk >= 1 Or PSNTEMP = "RADIOACTIVE") And norm = "" Then
+                            'y = locCHK(host)
+                            'If y = True Then
+                                verify = 1 'if all checks passed then we have verified our shipment
+                                Exit Sub
+                            'End If
+                        End If
+                    End If
+                End If
+            End If
+        End If
+    End If
+    If verify = 0 Then
+        If lastshipment = "306" Then GoTo SearchVAWB
+        If firstrun = 0 Then GoTo SearchVAWB
+    End If
+Loop
+End Sub 'end verify 023 sub
+Sub VerifyAWB(excelrow As Integer)
+'On Error GoTo errout
 
 URSAcheck = 0
 RQcheck = 0
 UNcheck = 0
-awbcheck = 0
+AWBcheck = 0
 
 bluerow = 6
 lineread = 0
@@ -173,8 +295,8 @@ Do Until verify = 1 Or (shipbegin = 1 And shipend = 1)
 
 verifyingAWB:
     col = 6
-    awbcheck = BZreadscreen(12, 4, 6)
-    If awbcheck = Sheet1.Cells(excelrow, 1).text Then
+    AWBcheck = BZreadscreen(12, 4, 6)
+    If AWBcheck = Sheet1.Cells(excelrow, 1).text Then
     
         'URSAcheck = BZreadscreen(8, 4, 35)
         row = 12
@@ -658,6 +780,8 @@ errout:
     & "source: " & Err.Source _
     & "help context: " & Err.HelpContext)
 End Function
+
+
 
 
 
