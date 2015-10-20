@@ -401,9 +401,9 @@ row = 6
 
 Do Until Sheet2.Cells(row, 4).text + Sheet2.Cells(row + 1, 4).text + Sheet2.Cells(row + 2, 4).text = ""
 n = Sheet2.Cells(row, 4).text + Sheet2.Cells(row + 1, 4).text + Sheet2.Cells(row + 2, 4).text
-u = Right(Sheet2.Cells(row, 2).Value, 4)
-If u <> "" Then
-    If CInt(u) > 1 Then
+U = Right(Sheet2.Cells(row, 2).Value, 4)
+If U <> "" Then
+    If CInt(U) > 1 Then
         TotalPieces = TotalPieces + Sheet2.Cells(row, 8).Value
     End If
 End If
@@ -423,5 +423,7 @@ BORG.labelUpdater.Caption = "Counting Pieces"
 Call Module4.pieceCount
 
 End Sub
+
+
 
 
