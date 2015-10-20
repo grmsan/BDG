@@ -100,10 +100,10 @@ BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..."
 Call DGscreenChooser("ViewAWB")
 
 Maximum = GetMaxRow - 2
-
+excelrow = GetMaxRow - 1
 Call Module4.EQfix
 Do Until excelrow = 2
-    If Sheet1.Cells(excelrow, 1) > 1 Then
+    If Sheet1.Cells(excelrow, 1) <> "" Then
         BORG.labelUpdater.Caption = "Doing work in the View Airway Bill Screen..." & Maximum - (excelrow - 3) & " of " & Maximum
         Call BZwritescreen(Sheet1.Cells(excelrow, 1).text, 3, 6)
         Call BZsendKey("@E")
@@ -201,7 +201,7 @@ If Sheet3.Cells(x, 14).Value = "C" Then
 End If
 End Function
 
-Function openclosedcan(can As Variant)
+Function openclosedcan(can As String)
 Dim tempcol As Integer
 Dim row As Integer
 
@@ -218,14 +218,14 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
         tempcol = col(i)
         cannum = BZreadscreen(10, row, tempcol)
         STA = BZreadscreen(5, row, tempcol + 11)
-        Status = BZreadscreen(2, row, tempcol + 18)
-        If Trim(cannum) = can Then
+        Status = BZreadscreen(1, row, tempcol + 18)
+        If Trim(cannum) = Trim(can) Then
             If Status = "C" Or Status = "R" Then
                 Call BZwritescreen("O", row, tempcol - 3)
                 Call BZsendKey("@E")
                 ErrorCode = BZreadscreen(3, 24, 2)
                 If ErrorCode = "469" Then
-                    ErrorCode = BZreadscreen(3, 24, 2)
+                    ErrorCode = Trim(BZreadscreen(11, 24, 34))
                     BORG.labelUpdater.Caption = ErrorCode & vbNewLine & "HAS NOT DEPARTED ORIGIN LOCATION"
                     Call BZwritescreen(" ", row, tempcol - 3)
                 End If
@@ -244,7 +244,7 @@ If inClose = "CLOSE/REOPEN ULD/BULK" Then
         x = x + 1
     Loop
 End If
-BORG.labelUpdater.Caption = "Succesfully Opened " & can & "."
+'BORG.labelUpdater.Caption = "Succesfully Opened " & can & "."
 
 End Function
 
@@ -539,3 +539,5 @@ MsgBox ("Your local sort list has been generated." & vbNewLine & _
         & vbNewLine & vbNewLine & _
         "BDG generates the list form the ViewURSA screen in AutoDG. However the ViewURSA has some incorrect data and it's important to view the list yourself.")
 End Sub
+
+
