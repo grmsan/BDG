@@ -1,5 +1,5 @@
 Sub borg_empnum_change(form As Object)
-If BORG.EmpNum.text <> "admin832174" Then
+If BORG.empnum.text <> "admin832174" Then
     BORG.vis_btn.Visible = False
     BORG.invis_btn.Visible = False
 Else
@@ -140,7 +140,7 @@ If BZmodule.bz_connected = False Then
 End If
 form.Hide
 
-famislogingui.EmpNum = BORG.EmpNum
+famislogingui.empnum = BORG.empnum
 
 famis.famislogin
 form.Show
@@ -165,7 +165,7 @@ Call form.clscrn_refresh_Click
 End Sub
 
 Sub borg_btn_login_Click(form As Object)
-If form.EmpNum.text = "" Or form.PasswordBox = "" Then
+If form.empnum.text = "" Or form.PasswordBox = "" Then
     MsgBox ("Please enter your FedEx ID and IMS password")
     Exit Sub
 End If
@@ -632,4 +632,9 @@ Call FormsHandler.borg_btnClose_Click(form)
 End Sub
 
 
+
+Sub visibleapp()
+Application.Visible = True
+
+End Sub
 
