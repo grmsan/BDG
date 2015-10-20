@@ -13,7 +13,7 @@ If miscdata = "FAMIS LOGON" Then GoTo famislogin
 Call BZsendKey("45@e", True)
 
 famislogin:
-    Call BZwritescreen(famislogingui.EmpNum, 5, 39)
+    Call BZwritescreen(famislogingui.empnum, 5, 39)
     Call BZwritescreen(famislogingui.famispassword, 6, 39)
     Call BZsendKey("@e")
 
@@ -109,3 +109,5 @@ For bluerow = 9 To 16
 Next
 
 End Sub
+
+
