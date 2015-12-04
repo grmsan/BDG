@@ -52,7 +52,7 @@ End If
 End Sub
 
 Sub borg_btn_AddCan_Click(form As Object)
-mycannum = form.txt_canNum
+mycannum = trim(form.txt_canNum)
 mysplit = form.combo_splitName
 myDest = form.txt_Dest
 myType = form.combo_hazType
