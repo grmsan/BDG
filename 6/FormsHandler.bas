@@ -573,6 +573,15 @@ End Sub
 
 Sub borg_UserForm_Initialize(form As Object)
 
+Dim Ctl As Control
+    For Each Ctl In form.Controls
+        'MsgBox TypeName(Ctl)
+        Select Case TypeName(Ctl)
+            Case "TextBox"
+                Ctl.TabKeyBehavior = False
+        End Select
+    Next Ctl
+
 BORG.btn_AddCan.Height = 18
 BORG.btn_AddCan.Left = 264
 BORG.btn_AddCan.Top = 2
