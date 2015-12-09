@@ -1,4 +1,4 @@
-Public Const strThisVer As String = "6.007"
+Public Const strThisVer As String = "6.015"
 
 Public Const strFileName As String = "BDG"
 
@@ -52,11 +52,13 @@ Next
     
 x = MsgBox("BDG is now up to date!" & vbNewLine & "BDG will close now to save updates.", vbInformation)
 
-For Each W In Application.Workbooks
-    W.Save
-Next W
-
-Application.Wait(Now + TimeValue("00:00:01"))
+Application.wait (Now + TimeValue("00:00:01"))
+Application.Visible = True
+Application.wait (Now + TimeValue("00:00:01"))
+ThisWorkbook.CloseandSave
+Application.wait (Now + TimeValue("00:00:01"))
+ThisWorkbook.Save
+Application.wait (Now + TimeValue("00:00:01"))
 Application.Quit
 
 End Sub
