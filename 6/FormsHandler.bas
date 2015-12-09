@@ -93,6 +93,14 @@ Call FunctionModule.UpdateCanList
 'call function saveWorkBook
 Application.ActiveWorkbook.Save
 form.txt_canNum.SetFocus
+Dim Ctl As Control
+    For Each Ctl In form.Controls
+        'MsgBox TypeName(Ctl)
+        Select Case TypeName(Ctl)
+            Case "TextBox"
+                Ctl.TabKeyBehavior = False
+        End Select
+    Next Ctl
 End Sub
 
 Sub borg_btn_AddIce_Click(form As Object)
